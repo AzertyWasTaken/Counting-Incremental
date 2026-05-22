@@ -1,0 +1,113 @@
+/* Background */
+/* ================================================================ */
+
+body {
+    font-family: Arial;
+    background: #181818;
+    text-align: center;
+    align-items: center;
+    padding: 8px;
+    max-width: 960px;
+    margin: auto;
+    color: #FFFFFF;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 10px 0;
+}
+
+.upgrades {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0 32px;
+}
+
+hr {
+    border: 2px solid #404040;
+}
+
+/* Text */
+/* ================================================================ */
+
+h1 {
+    font-size: 32px;
+}
+
+h2 {
+    font-size: 28px;
+}
+
+h3 {
+    font-size: 24px;
+}
+
+h4 {
+    font-size: 20px;
+}
+
+code {
+    background: #000000;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+}
+
+/* Upgrades */
+/* ================================================================ */
+
+.description {
+    margin: 4px;
+    max-width: 240px;
+    font-size: 14px;
+    color: #C0C0C0;
+}
+
+.upgrade-level {
+    margin: 4px;
+    max-width: 240px;
+    font-size: 16px;
+    color: #E0E0E0;
+}
+
+/* Button */
+/* ================================================================ */
+
+button {
+    background: #2080FF;
+    color: #FFFFFF;
+    box-sizing: border-box;
+    border: 0 solid #000;
+    padding: 6px 10px;
+    margin: 6px 6px 6px 0px;
+    font-size: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+button:hover {
+    background: #1070F0;
+}
+
+button:active {
+    background: #0060E0;
+}
+
+button:disabled {
+    background: #606060;
+    cursor: not-allowed;
+}
