@@ -13,15 +13,15 @@ const UPGRADES = [
     {
         name: "successor",
         text: "Successor",
-        cost: [5, 20, 100, 500, 2000],
-        max: 5,
+        cost: (i) => [5, 10, 30, 75, 200][i % 5] * 100**Math.floor(i / 5),
+        max: 10,
         description:
             "Increase base count multiplier by 1.",
     },
     {
         name: "autoCount",
         text: "Auto Count",
-        cost: [10, 200, 10000],
+        cost: [15, 50, 500],
         max: 3,
         description:
             "Increase score by 1 every 2s.",
@@ -29,7 +29,7 @@ const UPGRADES = [
     {
         name: "fastCounting",
         text: "Fast Counting",
-        cost: [500, 100000, 1000000000000],
+        cost: [100, 1000, 1000000],
         max: 3,
         description:
             "Decrease count cooldown by 0.25 seconds.",
@@ -37,15 +37,15 @@ const UPGRADES = [
     {
         name: "addition",
         text: "Addition",
-        cost: [150, 3500],
-        max: 2,
+        cost: [150, 750, 4000, 20000, 100000],
+        max: 5,
         description:
             "Increase base count multiplier by 2.",
     },
     {
         name: "multiplication",
         text: "Multiplication",
-        cost: [20000],
+        cost: 20000,
         max: 1,
         description:
             "Increase count multiplier by 100%.",
@@ -117,7 +117,14 @@ function getUpgCount(name) {
 }
 
 function getUpgCost(item) {
-    return item.cost[getUpgCount(item.name)];
+    const count = getUpgCount(item.name);
+    const cost = item.cost;
+
+    return typeof cost === "function"
+    ? cost(count)
+    : typeof cost === "number"
+    ? cost
+    : cost[count];
 }
 
 function isMaxed(item) {
@@ -131,6 +138,7 @@ function incUpgCount(name, inc) {
 function incNumber(inc) {
     score += inc;
     document.getElementById("score").textContent = score.toString();
+    updateNextResetSubtractionPointsUI();
     persistPlayerData();
 }
 
@@ -143,8 +151,8 @@ function buyUpg(cost, callback) {
 
 function costText(item) {
     return isMaxed(item)
-        ? "maxed"
-        : getUpgCost(item);
+    ? "maxed"
+    : getUpgCost(item);
 }
 
 // Formulas
@@ -169,7 +177,18 @@ function getCountCooldown() {
 }
 
 function getSubtractionPoints() {
-    return (score / RESET_REQUIREMENT)**0.5;
+    return (score / RESET_REQUIREMENT) ** 0.5;
+}
+
+function getNextResetSubtractionPoints() {
+    if (score < RESET_REQUIREMENT) return 0;
+    return Math.floor(getSubtractionPoints());
+}
+
+function updateNextResetSubtractionPointsUI() {
+    const el = document.getElementById("next-reset-subtraction-points");
+    if (!el) return;
+    el.textContent = getNextResetSubtractionPoints().toString();
 }
 
 // Gameplay
@@ -190,7 +209,7 @@ function resetForSubtractionPoints() {
     if (score < RESET_REQUIREMENT) return;
 
     // Earn subtraction points from current score.
-    const earned = Math.floor((score / RESET_REQUIREMENT)**0.5);
+    const earned = Math.floor((score / RESET_REQUIREMENT) ** 0.5);
     if (earned > 0) subtractionPoints += earned;
 
     // Reset run state.
@@ -204,6 +223,7 @@ function resetForSubtractionPoints() {
     // Update UI.
     document.getElementById("score").textContent = "0";
     document.getElementById("subtraction-points").textContent = subtractionPoints.toString();
+    updateNextResetSubtractionPointsUI();
 
     stopCountCooldown();
 
@@ -213,6 +233,34 @@ function resetForSubtractionPoints() {
     init();
 
     persistPlayerData();
+}
+
+function erasePlayerData() {
+    try {
+        localStorage.removeItem(LS_KEY_PLAYER);
+    } catch {
+        // ignore
+    }
+
+    // Reset in-memory state.
+    score = 0;
+    subtractionPoints = 0;
+
+    for (const key of Object.keys(boughtUpg)) {
+        delete boughtUpg[key];
+    }
+
+    // Update UI.
+    document.getElementById("score").textContent = "0";
+    document.getElementById("subtraction-points").textContent = "0";
+    updateNextResetSubtractionPointsUI();
+
+    stopCountCooldown();
+
+    // Rebuild upgrade nodes so button labels reset.
+    const upgradesEl = document.getElementById("upgrades");
+    upgradesEl.innerHTML = "";
+    init();
 }
 
 function startCountCooldown() {
@@ -256,6 +304,12 @@ document.getElementById("reset-subtraction").addEventListener("click", () => {
     resetForSubtractionPoints();
 });
 
+document.getElementById("erase-player-data")?.addEventListener("click", () => {
+    const ok = confirm("Erase all saved player data? This cannot be undone.");
+    if (!ok) return;
+    erasePlayerData();
+});
+
 // Init
 // ================================================================
 
@@ -295,4 +349,5 @@ function init() {
 }
 
 loadPlayerData();
+updateNextResetSubtractionPointsUI();
 init();

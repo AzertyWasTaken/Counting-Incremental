@@ -46,9 +46,9 @@ This file is a shared task-board. When editing, only:
 - [x] Display upgrade descriptions
 - [x] Display bought upgrades
 - [x] Display reset description
-- [ ] Display reset requirements
-- [ ] Display reset gains
+- [x] Display reset gains
 - [ ] Display gain rate
+- [ ] Reset player datas
 
 ## Adding Upgrades
 
