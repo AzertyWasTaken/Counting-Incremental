@@ -1,7 +1,4 @@
 "use strict";
-let score = 0;
-let subtractionPoints = 0;
-
 let canClick = true;
 
 let countCooldownEnd = 0;
@@ -13,16 +10,19 @@ const UPGRADES = [
     {
         name: "successor",
         text: "Successor",
-        cost: (i) => [5, 10, 30, 75, 200][i % 5] * 100**Math.floor(i / 5),
+        cost: (i) =>
+            [5, 10, 30, 75, 200][i % 5] * 100**Math.floor(i / 5),
         max: 10,
+        currency: "score",
         description:
             "Increase base count multiplier by 1.",
     },
     {
         name: "autoCount",
         text: "Auto Count",
-        cost: [15, 50, 500, 10000, 1000000000],
+        cost: [20, 50, 150, 500, 2000],
         max: 5,
+        currency: "score",
         description:
             "Increase score by 1 every 2s.",
     },
@@ -31,6 +31,7 @@ const UPGRADES = [
         text: "Fast Counting",
         cost: [100, 1000, 1000000],
         max: 3,
+        currency: "score",
         description:
             "Decrease count cooldown by 0.25 seconds.",
     },
@@ -39,6 +40,7 @@ const UPGRADES = [
         text: "Addition",
         cost: [150, 750, 4000, 20000, 100000],
         max: 5,
+        currency: "score",
         description:
             "Increase base count multiplier by 2.",
     },
@@ -47,8 +49,27 @@ const UPGRADES = [
         text: "Multiplication",
         cost: 20000,
         max: 1,
+        currency: "score",
         description:
             "Increase count multiplier and cooldown by 100%.",
+    },
+    {
+        name: "betterAutoCount",
+        text: "Better Auto Count",
+        cost: 3,
+        max: 1,
+        currency: "subtractionPoints",
+        description:
+            "Increase base auto count multiplier by 5.",
+    },
+    {
+        name: "predecessor",
+        text: "Predecessor",
+        cost: [5, 100],
+        max: 2,
+        currency: "subtractionPoints",
+        description:
+            "Increase count multiplier by 10%.",
     },
 ];
 
@@ -57,7 +78,11 @@ const UPGRADES = [
 
 const LS_KEY_PLAYER = "incremental.player";
 
-const boughtUpg = {};
+const playerUpgrades = {};
+const playerCurrencies = {
+    score: 0,
+    subtractionPoints: 0,
+};
 
 function safeParseJSON(raw) {
     try {
@@ -74,24 +99,24 @@ function loadPlayerData() {
     const data = safeParseJSON(raw);
     if (!data || typeof data !== "object") return;
 
-    if (Number.isFinite(data.score) && data.score >= 0) {
-        score = Math.floor(data.score);
+    if (Number.isFinite(data.playerCurrencies.score) && data.playerCurrencies.score >= 0) {
+        playerCurrencies.score = Math.floor(data.playerCurrencies.score);
     }
 
-    if (Number.isFinite(data.subtractionPoints) && data.subtractionPoints >= 0) {
-        subtractionPoints = Math.floor(data.subtractionPoints);
+    if (Number.isFinite(data.playerCurrencies.subtractionPoints) && data.playerCurrencies.subtractionPoints >= 0) {
+        playerCurrencies.subtractionPoints = Math.floor(data.playerCurrencies.subtractionPoints);
     }
 
-    if (data.boughtUpg && typeof data.boughtUpg === "object") {
-        for (const [k, v] of Object.entries(data.boughtUpg)) {
+    if (data.playerUpgrades && typeof data.playerUpgrades === "object") {
+        for (const [k, v] of Object.entries(data.playerUpgrades)) {
             if (!Number.isFinite(v)) continue;
             if (v < 0) continue;
-            boughtUpg[k] = Math.floor(v);
+            playerUpgrades[k] = Math.floor(v);
         }
     }
 
-    document.getElementById("score").textContent = score.toString();
-    document.getElementById("subtraction-points").textContent = subtractionPoints.toString();
+    document.getElementById("score").textContent = playerCurrencies.score.toString();
+    document.getElementById("subtraction-points").textContent = playerCurrencies.subtractionPoints.toString();
 }
 
 function persistPlayerData() {
@@ -99,9 +124,8 @@ function persistPlayerData() {
         localStorage.setItem(
             LS_KEY_PLAYER,
             JSON.stringify({
-                score,
-                subtractionPoints,
-                boughtUpg,
+                playerCurrencies,
+                playerUpgrades
             })
         );
     } catch {
@@ -113,7 +137,7 @@ function persistPlayerData() {
 // ================================================================
 
 function getUpgCount(name) {
-    return boughtUpg[name] ?? 0;
+    return playerUpgrades[name] ?? 0;
 }
 
 function getUpgCost(item) {
@@ -132,26 +156,30 @@ function isMaxed(item) {
 }
 
 function incUpgCount(name, inc) {
-    boughtUpg[name] = getUpgCount(name) + inc;
+    playerUpgrades[name] = getUpgCount(name) + inc;
 }
 
 function incNumber(inc) {
-    score += inc;
-    document.getElementById("score").textContent = toNotation(score);
+    playerCurrencies.score += inc;
+    document.getElementById("score").textContent = toNotation(playerCurrencies.score);
     persistPlayerData();
 }
 
-function buyUpg(cost, callback) {
-    if (score >= cost) {
+function buyUpg(cost, currency, callback) {
+    if (playerCurrencies[currency] >= cost) {
         incNumber(-cost);
         callback();
     }
 }
 
-function costText(item) {
+function getCostText(item) {
     return isMaxed(item)
-    ? "maxed"
+    ? "MAXED"
     : toNotation(getUpgCost(item));
+}
+
+function getLevelText(item) {
+    return `Level: ${getUpgCount(item.name)} / ${item.max}`;
 }
 
 function toNotation(num) {
@@ -164,7 +192,8 @@ function toNotation(num) {
 // ================================================================
 
 function getAutoCountBoost() {
-    return getUpgCount("autoCount");
+    return getUpgCount("autoCount")
+    + getUpgCount("betterAutoCount") * 5;
 }
 
 function getScoreBoost() {
@@ -172,9 +201,10 @@ function getScoreBoost() {
         1
         + getUpgCount("addition") * 2
         + getUpgCount("successor")
-        + subtractionPoints * 2
+        + playerCurrencies.subtractionPoints * 2
     )
-    * (getUpgCount("multiplication") + 1);
+    * (getUpgCount("multiplication") + 1)
+    * (getUpgCount("predecessor") * 0.1 + 1);
 }
 
 function getCountCooldown() {
@@ -186,8 +216,8 @@ function getCountCooldown() {
 }
 
 function getSubtractionPoints() {
-    if (score < RESET_REQUIREMENT) return 0;
-    return Math.floor((score / RESET_REQUIREMENT) ** 0.5);
+    if (playerCurrencies.score < RESET_REQUIREMENT) return 0;
+    return Math.floor((playerCurrencies.score / RESET_REQUIREMENT) ** 0.5);
 }
 
 // Display
@@ -219,11 +249,11 @@ function erasePlayerData() {
     }
 
     // Reset in-memory state.
-    score = 0;
-    subtractionPoints = 0;
+    playerCurrencies.score = 0;
+    playerCurrencies.subtractionPoints = 0;
 
-    for (const key of Object.keys(boughtUpg)) {
-        delete boughtUpg[key];
+    for (const key of Object.keys(playerUpgrades)) {
+        delete playerUpgrades[key];
     }
 
     // Update UI.
@@ -254,20 +284,20 @@ function stopCountCooldown() {
 }
 
 function resetForSubtractionPoints() {
-    if (score < RESET_REQUIREMENT) return;
+    if (playerCurrencies.score < RESET_REQUIREMENT) return;
 
     // Earn subtraction points from current score.
-    subtractionPoints += getSubtractionPoints();
-    score = 0;
+    playerCurrencies.subtractionPoints += getSubtractionPoints();
+    playerCurrencies.score = 0;
 
     // Clear upgrades.
-    for (const key of Object.keys(boughtUpg)) {
-        delete boughtUpg[key];
+    for (const key of Object.keys(playerUpgrades)) {
+        delete playerUpgrades[key];
     }
 
     // Update UI.
     document.getElementById("score").textContent = "0";
-    document.getElementById("subtraction-points").textContent = subtractionPoints.toString();
+    document.getElementById("subtraction-points").textContent = playerCurrencies.subtractionPoints.toString();
     updateNextResetSubtractionPointsUI();
     updateGainRateUI();
 
@@ -328,35 +358,61 @@ document.getElementById("erase-player-data")?.addEventListener("click", () => {
     erasePlayerData();
 });
 
-// Init
+// Create HTML Elements
 // ================================================================
 
-function createUpgNode(item) {
+function createUpgButton(item) {
     const wrap = document.createElement("div");
-    wrap.style = "margin-bottom: 16px;";
+    wrap.className = "upgrade-card";
+
+    const costWrap = document.createElement("div");
+    costWrap.className = "upgrade-cost";
+
+    const costEl = document.createElement("span");
+    costEl.className = "cost-value";
+    costEl.textContent = getCostText(item);
+
+    const currencyIcon = document.createElement("span");
+    currencyIcon.className = `cost-value ${item.currency}`;
+    currencyIcon.textContent = item.currency === "score" ? "P" : "S";
+    currencyIcon.title = item.currency === "score" ? "Score" : "Subtraction Points";
+
+    costWrap.appendChild(costEl);
+    costWrap.appendChild(currencyIcon);
 
     const upgBtn = document.createElement("button");
-    upgBtn.textContent = `${item.text} (cost: ${costText(item)})`;
+    upgBtn.textContent = item.text;
 
     const levelEl = document.createElement("p");
     levelEl.className = "upgrade-level";
-    levelEl.textContent = `Level: ${getUpgCount(item.name)} / ${item.max}`;
+    levelEl.textContent = getLevelText(item);
 
     const desc = document.createElement("p");
     desc.className = "description";
     desc.textContent = item.description ?? "";
 
     wrap.appendChild(upgBtn);
+    wrap.appendChild(costWrap);
     wrap.appendChild(levelEl);
     wrap.appendChild(desc);
     document.getElementById("upgrades").appendChild(wrap);
 
+    return [upgBtn, costEl, levelEl];
+}
+
+// Init
+// ================================================================
+
+function createUpgNode(item) {
+    const [upgBtn, costEl, levelEl] = createUpgButton(item);
+
     upgBtn.addEventListener("click", () => {
-        buyUpg(getUpgCost(item), () => {
+        buyUpg(getUpgCost(item), item.currency, () => {
             incUpgCount(item.name, 1);
             updateGainRateUI();
-            upgBtn.textContent = `${item.text} (cost: ${costText(item)})`;
-            levelEl.textContent = `Level: ${getUpgCount(item.name)} / ${item.max}`;
+            costEl.textContent = getCostText(item);
+            levelEl.textContent = getLevelText(item);
+            persistPlayerData();
         });
     });
 }

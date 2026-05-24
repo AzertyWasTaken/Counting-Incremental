@@ -12,22 +12,29 @@ This file is a shared task-board. When editing, only:
 
 - [x] Object for upgrades infos
 - [x] Object for bought upgrades
-- [ ] Reset player datas
+- [x] Save player data
+- [x] Reset player data
+- [ ] Object for currencies
+- [ ] Select upgrade currency cost
 
 ## Gameplay
 
 - [x] Counting upgrades
 - [x] Max upgrading system
-- [x] Save player data
 - [x] Reset for boosts (predecessor & subtraction points)
 - [x] Create large numbers notation
 - [x] Increase max upgrades (with functional cost rate)
 - [ ] Subtraction upgrades
-  - [ ] Add 10% to the score (floored)
+  - [x] +5 auto count points
+  - [x] Add 10% to the score (floored)
   - [ ] Reset keep successor upgrades
   - [ ] Unlock level bar (division & modulo points)
-    - [ ] Must cost numbers
+    - [ ] Must cost numbers to unlock
+    - [ ] Boosts counting
+    - [ ] Req increase exponentially
+    - [ ] Allow unlocking stuff
 - [ ] 0.1s cooldown for buying upgrades
+- [ ] Rename `Subtraction Points` to `Negative Points`
 
 ### G/Ideas
 
@@ -40,6 +47,8 @@ This file is a shared task-board. When editing, only:
 - [x] Reset player data
 - [x] Create favicons
 - [x] Display gain rate
+- [x] Display currency used for cost
+- [ ] Style whole upgrade card
 
 ## Adding Upgrades
 
@@ -62,11 +71,12 @@ This file is a shared task-board. When editing, only:
 - Equal
 - Greater than
 - Less than
+- Negative numbers
 - Multiplication
 - Division
 - Parity
 - Modulo
-- Negative numbers
+- Rational numbers
 - Number sequences
 - Square numbers
 - Triangular numbers ←

@@ -66,8 +66,29 @@ label {
     font-weight: 700;
 }
 
-/* Upgrades */
+/* Upgrade */
 /* ================================================================ */
+
+.upgrade-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.upgrade-cost {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+}
+
+.cost-value.score {
+    color: #40FFA0;
+}
+
+.cost-value.subtractionPoints {
+    color: #FF6040;
+}
 
 .description {
     margin: 4px;
