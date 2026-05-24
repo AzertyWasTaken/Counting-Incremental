@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Incremental</title>
     <link rel="stylesheet" href="style.css">
-    <!-- <link rel="icon" type="image/x-icon" href="favicon.png"> -->
+    <link rel="icon" type="image/x-icon" href="favicon.png">
 </head>
 
 <body>
@@ -26,13 +26,20 @@
         <button id="count">Count</button>
     </div>
 
+    <div class="row" style="margin-top: 4px;">
+        <p class="description" style="margin: 0; max-width: none;">
+            Manual gain/click: <span id="gain-rate-manual">0</span> |
+            Auto gain/tick: <span id="gain-rate-auto">0</span>
+        </p>
+    </div>
+
     <hr>
 
     <div id="upgrades" class="upgrades"></div>
 
     <div class="upgrades">
         <div>
-            <button id="reset-subtraction">Reset (required: 1000)</button>
+            <button id="reset-subtraction">Reset (required: 1K)</button>
             <p class="description">Reset all your upgrades for Subtraction Points — each Subtraction Point increase the base score multiplier by 1</p>
 
             <div class="row">

@@ -21,8 +21,8 @@ const UPGRADES = [
     {
         name: "autoCount",
         text: "Auto Count",
-        cost: [15, 50, 500],
-        max: 3,
+        cost: [15, 50, 500, 10000, 1000000000],
+        max: 5,
         description:
             "Increase score by 1 every 2s.",
     },
@@ -48,7 +48,7 @@ const UPGRADES = [
         cost: 20000,
         max: 1,
         description:
-            "Increase count multiplier by 100%.",
+            "Increase count multiplier and cooldown by 100%.",
     },
 ];
 
@@ -137,8 +137,7 @@ function incUpgCount(name, inc) {
 
 function incNumber(inc) {
     score += inc;
-    document.getElementById("score").textContent = score.toString();
-    updateNextResetSubtractionPointsUI();
+    document.getElementById("score").textContent = toNotation(score);
     persistPlayerData();
 }
 
@@ -152,18 +151,28 @@ function buyUpg(cost, callback) {
 function costText(item) {
     return isMaxed(item)
     ? "maxed"
-    : getUpgCost(item);
+    : toNotation(getUpgCost(item));
+}
+
+function toNotation(num) {
+    if (num < 1000) return num.toString();
+    if (num < 1000000) return (num / 1000).toString() + "K";
+    return (num / 1000000).toString() + "M";
 }
 
 // Formulas
 // ================================================================
+
+function getAutoCountBoost() {
+    return getUpgCount("autoCount");
+}
 
 function getScoreBoost() {
     return (
         1
         + getUpgCount("addition") * 2
         + getUpgCount("successor")
-        + subtractionPoints
+        + subtractionPoints * 2
     )
     * (getUpgCount("multiplication") + 1);
 }
@@ -177,63 +186,30 @@ function getCountCooldown() {
 }
 
 function getSubtractionPoints() {
-    return (score / RESET_REQUIREMENT) ** 0.5;
+    if (score < RESET_REQUIREMENT) return 0;
+    return Math.floor((score / RESET_REQUIREMENT) ** 0.5);
 }
 
-function getNextResetSubtractionPoints() {
-    if (score < RESET_REQUIREMENT) return 0;
-    return Math.floor(getSubtractionPoints());
-}
+// Display
+// ================================================================
 
 function updateNextResetSubtractionPointsUI() {
     const el = document.getElementById("next-reset-subtraction-points");
     if (!el) return;
-    el.textContent = getNextResetSubtractionPoints().toString();
+    el.textContent = getSubtractionPoints().toString();
 }
 
-// Gameplay
+function updateGainRateUI() {
+    const manualEl = document.getElementById("gain-rate-manual");
+    const autoEl = document.getElementById("gain-rate-auto");
+    if (!manualEl || !autoEl) return;
+
+    manualEl.textContent = parseInt(getScoreBoost());
+    autoEl.textContent = parseInt(getAutoCountBoost());
+}
+
+// Erase Data
 // ================================================================
-
-function stopCountCooldown() {
-    canClick = true;
-    countCooldownEnd = 0;
-
-    if (countCooldownInterval) clearInterval(countCooldownInterval);
-    countCooldownInterval = null;
-
-    const cooldownEl = document.getElementById("count-cooldown");
-    cooldownEl.textContent = "0";
-}
-
-function resetForSubtractionPoints() {
-    if (score < RESET_REQUIREMENT) return;
-
-    // Earn subtraction points from current score.
-    const earned = Math.floor((score / RESET_REQUIREMENT) ** 0.5);
-    if (earned > 0) subtractionPoints += earned;
-
-    // Reset run state.
-    score = 0;
-
-    // Clear upgrades.
-    for (const key of Object.keys(boughtUpg)) {
-        delete boughtUpg[key];
-    }
-
-    // Update UI.
-    document.getElementById("score").textContent = "0";
-    document.getElementById("subtraction-points").textContent = subtractionPoints.toString();
-    updateNextResetSubtractionPointsUI();
-
-    stopCountCooldown();
-
-    // Rebuild upgrade nodes so button labels reset.
-    const upgradesEl = document.getElementById("upgrades");
-    upgradesEl.innerHTML = "";
-    init();
-
-    persistPlayerData();
-}
 
 function erasePlayerData() {
     try {
@@ -263,6 +239,48 @@ function erasePlayerData() {
     init();
 }
 
+// Gameplay
+// ================================================================
+
+function stopCountCooldown() {
+    canClick = true;
+    countCooldownEnd = 0;
+
+    if (countCooldownInterval) clearInterval(countCooldownInterval);
+    countCooldownInterval = null;
+
+    const cooldownEl = document.getElementById("count-cooldown");
+    cooldownEl.textContent = "0";
+}
+
+function resetForSubtractionPoints() {
+    if (score < RESET_REQUIREMENT) return;
+
+    // Earn subtraction points from current score.
+    subtractionPoints += getSubtractionPoints();
+    score = 0;
+
+    // Clear upgrades.
+    for (const key of Object.keys(boughtUpg)) {
+        delete boughtUpg[key];
+    }
+
+    // Update UI.
+    document.getElementById("score").textContent = "0";
+    document.getElementById("subtraction-points").textContent = subtractionPoints.toString();
+    updateNextResetSubtractionPointsUI();
+    updateGainRateUI();
+
+    stopCountCooldown();
+
+    // Rebuild upgrade nodes so button labels reset.
+    const upgradesEl = document.getElementById("upgrades");
+    upgradesEl.innerHTML = "";
+    init();
+
+    persistPlayerData();
+}
+
 function startCountCooldown() {
     canClick = false;
     countCooldownEnd = Date.now() + getCountCooldown();
@@ -290,13 +308,13 @@ function startCountCooldown() {
 }
 
 setInterval(() => {
-    incNumber(getUpgCount("autoCount"));
+    incNumber(getAutoCountBoost());
 }, 2000)
 
 document.getElementById("count").addEventListener("click", () => {
     if (!canClick) return;
-    incNumber(getScoreBoost());
 
+    incNumber(getScoreBoost());
     startCountCooldown();
 });
 
@@ -336,6 +354,7 @@ function createUpgNode(item) {
     upgBtn.addEventListener("click", () => {
         buyUpg(getUpgCost(item), () => {
             incUpgCount(item.name, 1);
+            updateGainRateUI();
             upgBtn.textContent = `${item.text} (cost: ${costText(item)})`;
             levelEl.textContent = `Level: ${getUpgCount(item.name)} / ${item.max}`;
         });
@@ -343,11 +362,13 @@ function createUpgNode(item) {
 }
 
 function init() {
+    updateNextResetSubtractionPointsUI();
+    updateGainRateUI();
+
     for (const item of UPGRADES) {
         createUpgNode(item);
     }
 }
 
 loadPlayerData();
-updateNextResetSubtractionPointsUI();
 init();

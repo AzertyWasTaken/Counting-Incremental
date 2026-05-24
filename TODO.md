@@ -16,18 +16,14 @@ This file is a shared task-board. When editing, only:
 
 ## Gameplay
 
-- [x] Increase click gain
-- [x] Buy upgrades multiple times
-- [x] Auto clicker
-- [x] Reduce successor cooldown
-- [x] Save player datas
-- [x] Addition upgrades
-- [x] Double numbers gain and successor cooldown
+- [x] Counting upgrades
+- [x] Max upgrading system
+- [x] Save player data
 - [x] Reset for boosts (predecessor & subtraction points)
-- [ ] Create large numbers notation
-- [ ] Increase max upgrades (with functional cost rate)
+- [x] Create large numbers notation
+- [x] Increase max upgrades (with functional cost rate)
 - [ ] Subtraction upgrades
-  - [ ] Add 10% to the score
+  - [ ] Add 10% to the score (floored)
   - [ ] Reset keep successor upgrades
   - [ ] Unlock level bar (division & modulo points)
     - [ ] Must cost numbers
@@ -41,14 +37,9 @@ This file is a shared task-board. When editing, only:
 
 ## Design
 
-- [x] Display successor cooldown
-- [x] Update addition cost
-- [x] Display upgrade descriptions
-- [x] Display bought upgrades
-- [x] Display reset description
-- [x] Display reset gains
-- [ ] Display gain rate
-- [ ] Reset player datas
+- [x] Reset player data
+- [x] Create favicons
+- [x] Display gain rate
 
 ## Adding Upgrades
 
@@ -75,8 +66,9 @@ This file is a shared task-board. When editing, only:
 - Division
 - Parity
 - Modulo
+- Negative numbers
 - Number sequences
-- Square numbers ←
-- Triangular numbers
+- Square numbers
+- Triangular numbers ←
 - Powers of 2
 - Exponentiation
