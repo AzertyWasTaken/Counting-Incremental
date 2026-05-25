@@ -21,6 +21,22 @@ body {
     margin: 10px 0;
 }
 
+hr {
+    border: 2px solid #404040;
+}
+
+/* Upgrade grid (the actual list in #upgrades) */
+#upgrades {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 0;
+}
+
+/* Generic layout containers */
 .upgrades {
     display: flex;
     flex-direction: row;
@@ -28,10 +44,6 @@ body {
     align-items: flex-start;
     justify-content: center;
     gap: 0 32px;
-}
-
-hr {
-    border: 2px solid #404040;
 }
 
 /* Text */
@@ -66,42 +78,99 @@ label {
     font-weight: 700;
 }
 
-/* Upgrade */
+/* Upgrade card */
 /* ================================================================ */
 
 .upgrade-card {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+    justify-content: flex-start;
+
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 8px;
+
+    border-radius: 8px;
+    background: #202020;
+    gap: 6px;
 }
 
 .upgrade-cost {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
-.cost-value.score {
+.cost-value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cost-currency {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 6px;
+    margin-top: 2px;
+    border-radius: 1000000px;
+    border: 2px solid;
+}
+
+.cost-currency.score {
     color: #40FFA0;
+    background: rgba(64, 255, 160, 0.1);
+    border-color: rgba(64, 255, 160, 0.2);
 }
 
-.cost-value.subtractionPoints {
+.cost-currency.subtractionPoints {
     color: #FF6040;
+    background: rgba(255, 96, 64, 0.1);
+    border-color: rgba(255, 96, 64, 0.2);
 }
 
 .description {
-    margin: 4px;
+    margin: 0;
     max-width: 240px;
+    align-self: center;
+
     font-size: 14px;
     color: #C0C0C0;
 }
 
 .upgrade-level {
-    margin: 4px;
+    margin: 0;
     max-width: 240px;
+    align-self: center;
+
     font-size: 16px;
     color: #E0E0E0;
+}
+
+/* Upgrade button */
+/* ================================================================ */
+
+.upgrade-buy {
+    width: 100%;
+    align-self: center;
+    margin: 0;
+}
+
+.upgrade-buy:active {
+    transform: translateY(2px);
+}
+
+.upgrade-buy:disabled {
+    background: #606060;
+    box-shadow: none;
+}
+
+.upgrade-buy:disabled:active {
+    transform: translateY(0);
 }
 
 /* Button */
@@ -113,7 +182,7 @@ button {
     box-sizing: border-box;
     border: 0 solid #000;
     padding: 6px 10px;
-    margin: 6px 6px 6px 0px;
+    margin: 6px;
     font-size: 20px;
     border-radius: 4px;
     cursor: pointer;
@@ -130,5 +199,6 @@ button:active {
 
 button:disabled {
     background: #606060;
+    color: #E0E0E0;
     cursor: not-allowed;
 }

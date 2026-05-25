@@ -71,6 +71,15 @@ const UPGRADES = [
         description:
             "Increase count multiplier by 10%.",
     },
+    {
+        name: "unlockLevelBar",
+        text: "Predecessor",
+        cost: 10000,
+        max: 1,
+        currency: "subtractionPoints",
+        description:
+            "Unlock Level Bar",
+    },
 ];
 
 // Persisted player data
@@ -161,7 +170,8 @@ function incUpgCount(name, inc) {
 
 function incNumber(inc) {
     playerCurrencies.score += inc;
-    document.getElementById("score").textContent = toNotation(playerCurrencies.score);
+    updateScoreUI();
+    updateNextResetSubtractionPointsUI();
     persistPlayerData();
 }
 
@@ -197,19 +207,17 @@ function getAutoCountBoost() {
 }
 
 function getScoreBoost() {
-    return (
-        1
+    return Math.floor((1
         + getUpgCount("addition") * 2
         + getUpgCount("successor")
         + playerCurrencies.subtractionPoints * 2
     )
     * (getUpgCount("multiplication") + 1)
-    * (getUpgCount("predecessor") * 0.1 + 1);
+    * (getUpgCount("predecessor") * 0.1 + 1));
 }
 
 function getCountCooldown() {
-    return (
-        1000
+    return (1000
         - getUpgCount("fastCounting") * 250
     ) 
     * (getUpgCount("multiplication") + 1);
@@ -227,6 +235,10 @@ function updateNextResetSubtractionPointsUI() {
     const el = document.getElementById("next-reset-subtraction-points");
     if (!el) return;
     el.textContent = getSubtractionPoints().toString();
+}
+
+function updateScoreUI() {
+    document.getElementById("score").textContent = toNotation(playerCurrencies.score);
 }
 
 function updateGainRateUI() {
@@ -373,7 +385,7 @@ function createUpgButton(item) {
     costEl.textContent = getCostText(item);
 
     const currencyIcon = document.createElement("span");
-    currencyIcon.className = `cost-value ${item.currency}`;
+    currencyIcon.className = `cost-currency ${item.currency}`;
     currencyIcon.textContent = item.currency === "score" ? "P" : "S";
     currencyIcon.title = item.currency === "score" ? "Score" : "Subtraction Points";
 
@@ -381,7 +393,9 @@ function createUpgButton(item) {
     costWrap.appendChild(currencyIcon);
 
     const upgBtn = document.createElement("button");
+    upgBtn.className = "upgrade-buy";
     upgBtn.textContent = item.text;
+    upgBtn.disabled = isMaxed(item);
 
     const levelEl = document.createElement("p");
     levelEl.className = "upgrade-level";
@@ -407,11 +421,17 @@ function createUpgNode(item) {
     const [upgBtn, costEl, levelEl] = createUpgButton(item);
 
     upgBtn.addEventListener("click", () => {
+        if (isMaxed(item)) return;
+
         buyUpg(getUpgCost(item), item.currency, () => {
             incUpgCount(item.name, 1);
             updateGainRateUI();
+
+            // UI refresh
             costEl.textContent = getCostText(item);
             levelEl.textContent = getLevelText(item);
+            upgBtn.disabled = isMaxed(item);
+
             persistPlayerData();
         });
     });
@@ -419,6 +439,7 @@ function createUpgNode(item) {
 
 function init() {
     updateNextResetSubtractionPointsUI();
+    updateScoreUI();
     updateGainRateUI();
 
     for (const item of UPGRADES) {
