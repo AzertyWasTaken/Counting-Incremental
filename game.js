@@ -71,15 +71,6 @@ const UPGRADES = [
         description:
             "Increase count multiplier by 10%.",
     },
-    {
-        name: "unlockLevelBar",
-        text: "Predecessor",
-        cost: 10000,
-        max: 1,
-        currency: "subtractionPoints",
-        description:
-            "Unlock Level Bar",
-    },
 ];
 
 // Persisted player data
