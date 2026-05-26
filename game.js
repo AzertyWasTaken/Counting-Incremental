@@ -359,13 +359,13 @@ function startCountCooldown() {
 }
 
 setInterval(() => {
-    incNumber(getAutoCountBoost());
+    incNumber("score", getAutoCountBoost());
 }, 2000)
 
 document.getElementById("count").addEventListener("click", () => {
     if (!canClick) return;
 
-    incNumber(getScoreBoost());
+    incNumber("score", getScoreBoost());
     startCountCooldown();
 });
 
