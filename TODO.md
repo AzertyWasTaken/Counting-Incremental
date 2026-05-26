@@ -16,6 +16,7 @@ This file is a shared task-board. When editing, only:
 - [x] Reset player data
 - [x] Object for currencies
 - [x] Select upgrade currency cost
+- [x] Fix subtraction upgrades resetting
 - [ ] Create currency test tool
 
 ## Gameplay
@@ -51,6 +52,8 @@ This file is a shared task-board. When editing, only:
 - [x] Display currency used for cost
 - [x] Style whole upgrade card
 - [x] Disable upgrades when maxed
+- [ ] Style reset button
+- [ ] Style reset data
 
 ## Adding Upgrades
 

@@ -69,8 +69,17 @@ const UPGRADES = [
         max: 2,
         currency: "subtractionPoints",
         description:
-            "Increase count multiplier by 10%.",
+            "Increase count multiplier by 20%.",
     },
+    // {
+    //     name: "unlockLevelBar",
+    //     text: "Level Bar",
+    //     cost: 10000,
+    //     max: 1,
+    //     currency: "subtractionPoints",
+    //     description:
+    //         "Unlock Level Bar",
+    // },
 ];
 
 // Persisted player data
@@ -204,7 +213,7 @@ function getScoreBoost() {
         + playerCurrencies.subtractionPoints * 2
     )
     * (getUpgCount("multiplication") + 1)
-    * (getUpgCount("predecessor") * 0.1 + 1));
+    * (getUpgCount("predecessor") * 0.2 + 1));
 }
 
 function getCountCooldown() {
@@ -289,13 +298,14 @@ function stopCountCooldown() {
 function resetForSubtractionPoints() {
     if (playerCurrencies.score < RESET_REQUIREMENT) return;
 
-    // Earn subtraction points from current score.
+    // Earn subtraction points from current score
     playerCurrencies.subtractionPoints += getSubtractionPoints();
     playerCurrencies.score = 0;
 
-    // Clear upgrades.
-    for (const key of Object.keys(playerUpgrades)) {
-        delete playerUpgrades[key];
+    // Reset ONLY score-based upgrades
+    for (const item of UPGRADES) {
+        if (item.currency !== "score") continue;
+        delete playerUpgrades[item.name];
     }
 
     // Update UI.
@@ -306,7 +316,7 @@ function resetForSubtractionPoints() {
 
     stopCountCooldown();
 
-    // Rebuild upgrade nodes so button labels reset.
+    // Rebuild upgrade nodes so button labels/costs update to reflect reset.
     const upgradesEl = document.getElementById("upgrades");
     upgradesEl.innerHTML = "";
     init();
