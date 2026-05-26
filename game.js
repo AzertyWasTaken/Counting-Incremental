@@ -149,6 +149,10 @@ function getUpgCount(name) {
     return playerUpgrades[name] ?? 0;
 }
 
+function getCurrCount(name) {
+    return playerCurrencies[name] ?? 0;
+}
+
 function getUpgCost(item) {
     const count = getUpgCount(item.name);
     const cost = item.cost;
@@ -168,16 +172,20 @@ function incUpgCount(name, inc) {
     playerUpgrades[name] = getUpgCount(name) + inc;
 }
 
-function incNumber(inc) {
-    playerCurrencies.score += inc;
+function incCurrencyCount(name, inc) {
+    playerCurrencies[name] = getCurrCount(name) + inc;
+}
+
+function incNumber(currency, inc) {
+    incCurrencyCount(currency, inc);
     updateScoreUI();
     updateNextResetSubtractionPointsUI();
     persistPlayerData();
 }
 
 function buyUpg(cost, currency, callback) {
-    if (playerCurrencies[currency] >= cost) {
-        incNumber(-cost);
+    if (getCurrCount(currency) >= cost) {
+        incNumber(currency, -cost);
         callback();
     }
 }
