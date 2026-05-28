@@ -23,10 +23,11 @@ body {
 
 hr {
     border: 2px solid #404040;
+    margin: 16px 0;
 }
 
 /* Upgrade grid (the actual list in #upgrades) */
-#upgrades {
+.upgrades-list {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     justify-content: center;
@@ -38,11 +39,8 @@ hr {
 
 /* Generic layout containers */
 .upgrades {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: center;
+    margin: 6px auto;
+    max-width: 320px;
     gap: 0 32px;
 }
 
@@ -201,4 +199,23 @@ button:disabled {
     background: #606060;
     color: #E0E0E0;
     cursor: not-allowed;
+}
+
+/* Level bar */
+/* ================================================================ */
+
+.level-bar-wrap {
+    min-height: 10px;
+}
+
+.level-bar-track {
+    min-height: 10px;
+    background: #606060;
+    border-radius: 1000000px;
+    overflow: hidden;
+}
+
+.level-bar-fill {
+    min-height: 10px;
+    background: #FFE000;
 }

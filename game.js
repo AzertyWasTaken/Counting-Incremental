@@ -4,7 +4,7 @@ let canClick = true;
 let countCooldownEnd = 0;
 let countCooldownInterval = null;
 
-const RESET_REQUIREMENT = 1000;
+const RESET_REQUIREMENT = 500;
 
 const UPGRADES = [
     {
@@ -71,15 +71,15 @@ const UPGRADES = [
         description:
             "Increase count multiplier by 20%.",
     },
-    // {
-    //     name: "unlockLevelBar",
-    //     text: "Level Bar",
-    //     cost: 10000,
-    //     max: 1,
-    //     currency: "subtractionPoints",
-    //     description:
-    //         "Unlock Level Bar",
-    // },
+    {
+        name: "unlockLevelBar",
+        text: "Level Bar",
+        cost: 10000,
+        max: 1,
+        currency: "subtractionPoints",
+        description:
+            "Unlock Level Bar",
+    },
 ];
 
 // Persisted player data
@@ -88,10 +88,7 @@ const UPGRADES = [
 const LS_KEY_PLAYER = "incremental.player";
 
 const playerUpgrades = {};
-const playerCurrencies = {
-    score: 0,
-    subtractionPoints: 0,
-};
+const playerCurrencies = {};
 
 function safeParseJSON(raw) {
     try {
@@ -108,12 +105,12 @@ function loadPlayerData() {
     const data = safeParseJSON(raw);
     if (!data || typeof data !== "object") return;
 
-    if (Number.isFinite(data.playerCurrencies.score) && data.playerCurrencies.score >= 0) {
-        playerCurrencies.score = Math.floor(data.playerCurrencies.score);
-    }
-
-    if (Number.isFinite(data.playerCurrencies.subtractionPoints) && data.playerCurrencies.subtractionPoints >= 0) {
-        playerCurrencies.subtractionPoints = Math.floor(data.playerCurrencies.subtractionPoints);
+    if (data.playerCurrencies && typeof data.playerCurrencies === "object") {
+        for (const [k, v] of Object.entries(data.playerCurrencies)) {
+            if (!Number.isFinite(v)) continue;
+            if (v < 0) continue;
+            playerCurrencies[k] = Math.floor(v);
+        }
     }
 
     if (data.playerUpgrades && typeof data.playerUpgrades === "object") {
@@ -124,8 +121,8 @@ function loadPlayerData() {
         }
     }
 
-    document.getElementById("score").textContent = playerCurrencies.score.toString();
-    document.getElementById("subtraction-points").textContent = playerCurrencies.subtractionPoints.toString();
+    document.getElementById("score").textContent = toNotation(playerCurrencies.score);
+    document.getElementById("subtraction-points").textContent = toNotation(playerCurrencies.subtractionPoints);
 }
 
 function persistPlayerData() {
@@ -149,8 +146,16 @@ function getUpgCount(name) {
     return playerUpgrades[name] ?? 0;
 }
 
+function incUpgCount(name, inc) {
+    playerUpgrades[name] = getUpgCount(name) + inc;
+}
+
 function getCurrCount(name) {
     return playerCurrencies[name] ?? 0;
+}
+
+function incCurrencyCount(name, inc) {
+    playerCurrencies[name] = getCurrCount(name) + inc;
 }
 
 function getUpgCost(item) {
@@ -166,14 +171,6 @@ function getUpgCost(item) {
 
 function isMaxed(item) {
     return getUpgCount(item.name) >= item.max;
-}
-
-function incUpgCount(name, inc) {
-    playerUpgrades[name] = getUpgCount(name) + inc;
-}
-
-function incCurrencyCount(name, inc) {
-    playerCurrencies[name] = getCurrCount(name) + inc;
 }
 
 function incNumber(currency, inc) {
@@ -203,7 +200,7 @@ function getLevelText(item) {
 function toNotation(num) {
     if (num < 1000) return num.toString();
     if (num < 1000000) return (num / 1000).toString() + "K";
-    return (num / 1000000).toString() + "M";
+    return (Math.floor(num / 1000) / 1000).toString() + "M";
 }
 
 // Formulas
@@ -218,10 +215,11 @@ function getScoreBoost() {
     return Math.floor((1
         + getUpgCount("addition") * 2
         + getUpgCount("successor")
-        + playerCurrencies.subtractionPoints * 2
+        + playerCurrencies.subtractionPoints
     )
     * (getUpgCount("multiplication") + 1)
-    * (getUpgCount("predecessor") * 0.2 + 1));
+    * (getUpgCount("predecessor") * 0.2 + 1))
+    * (getUpgCount("level") * 0.05 + 1);
 }
 
 function getCountCooldown() {
@@ -232,17 +230,45 @@ function getCountCooldown() {
 }
 
 function getSubtractionPoints() {
-    if (playerCurrencies.score < RESET_REQUIREMENT) return 0;
-    return Math.floor((playerCurrencies.score / RESET_REQUIREMENT) ** 0.5);
+    if (getCurrCount("score") < RESET_REQUIREMENT) return 0;
+    return Math.floor((getCurrCount("score") / RESET_REQUIREMENT) ** 0.5);
+}
+
+const LEVEL_UNLOCK_UPGRADE = "unlockLevelBar";
+
+function getLevelUpReq() {
+    return 10 ** getCurrCount("level");
 }
 
 // Display
 // ================================================================
 
+function updateLevelBarUI() {
+    const section = document.getElementById("level-bar-section");
+    const levelEl = document.getElementById("level");
+    const levelProgressTextEl = document.getElementById("level-progress-text");
+    const fillEl = document.getElementById("level-bar-fill");
+
+    if (!section || !levelEl || !levelProgressTextEl || !fillEl) return;
+
+    const unlocked = getUpgCount(LEVEL_UNLOCK_UPGRADE) >= 1;
+    section.style.display = unlocked ? "block" : "none";
+    if (!unlocked) return;
+
+    const progress = toNotation(getCurrCount("xp"));
+    const nextReq = toNotation(getLevelUpReq());
+
+    levelEl.textContent = getCurrCount("level");
+    levelProgressTextEl.textContent = `${progress} / ${nextReq}`;
+
+    const pct = Math.max(0, Math.min(1, progress / nextReq));
+    fillEl.style.width = `${Math.round(pct * 1000) / 10}%`;
+}
+
 function updateNextResetSubtractionPointsUI() {
     const el = document.getElementById("next-reset-subtraction-points");
     if (!el) return;
-    el.textContent = getSubtractionPoints().toString();
+    el.textContent = toNotation(getSubtractionPoints());
 }
 
 function updateScoreUI() {
@@ -318,7 +344,7 @@ function resetForSubtractionPoints() {
 
     // Update UI.
     document.getElementById("score").textContent = "0";
-    document.getElementById("subtraction-points").textContent = playerCurrencies.subtractionPoints.toString();
+    document.getElementById("subtraction-points").textContent = toNotation(playerCurrencies.subtractionPoints);
     updateNextResetSubtractionPointsUI();
     updateGainRateUI();
 
@@ -358,16 +384,39 @@ function startCountCooldown() {
     }, 50);
 }
 
+function checkLevelUp() {
+    for (let i = 0; i < 100; i++) {
+        const requirement = getLevelUpReq();
+        if (getCurrCount("xp") >= requirement) {
+            incCurrencyCount("level", 1);
+            incCurrencyCount("xp", -requirement);
+        }
+        else break;
+    }
+}
+
+function count() {
+    if (!canClick) return;
+
+    incNumber("score", getScoreBoost());
+
+    const levelUnlocked = getUpgCount(LEVEL_UNLOCK_UPGRADE) >= 1;
+
+    if (levelUnlocked) {
+        incCurrencyCount("xp", 1);
+        checkLevelUp();
+        updateLevelBarUI();
+    }
+
+    persistPlayerData();
+    startCountCooldown();
+}
+
 setInterval(() => {
     incNumber("score", getAutoCountBoost());
 }, 2000)
 
-document.getElementById("count").addEventListener("click", () => {
-    if (!canClick) return;
-
-    incNumber("score", getScoreBoost());
-    startCountCooldown();
-});
+document.getElementById("count").addEventListener("click", count);
 
 document.getElementById("reset-subtraction").addEventListener("click", () => {
     resetForSubtractionPoints();
@@ -441,6 +490,10 @@ function createUpgNode(item) {
             levelEl.textContent = getLevelText(item);
             upgBtn.disabled = isMaxed(item);
 
+            if (item.name === "unlockLevelBar") {
+                playerCurrencies.level = Math.max(1, playerCurrencies.level);
+            }
+
             persistPlayerData();
         });
     });
@@ -450,9 +503,15 @@ function init() {
     updateNextResetSubtractionPointsUI();
     updateScoreUI();
     updateGainRateUI();
+    updateLevelBarUI();
 
     for (const item of UPGRADES) {
         createUpgNode(item);
+    }
+
+    // Used for testing (ignore)
+    if (false) {
+        playerCurrencies.subtractionPoints = 10**6;
     }
 }
 
