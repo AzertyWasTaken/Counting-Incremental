@@ -28,16 +28,13 @@ This file is a shared task-board. When editing, only:
 - [x] Increase max upgrades (with functional cost rate)
 - [x] Add levels mechanic
 - [x] Show level bar
-- [ ] Make levels boost score
-- [ ] 0.1s cooldown for buying upgrades
-- [ ] Rename `Subtraction Points` to `Negative Points`
+- [x] Make levels boost score
 
 ### Subtraction upgrades
 
 - [x] +5 auto count points
 - [x] Add 10% to the score (floored)
 - [x] Unlock level bar (division & modulo points)
-- [ ] Reset keep successor upgrades
 
 ### G/Ideas
 
@@ -45,6 +42,9 @@ This file is a shared task-board. When editing, only:
 - Milestones
 - Challenges
 - Upgrading function
+- 0.1s cooldown for buying upgrades
+- Upgrades to keep stuff on reset
+- Increase count by 10% per Successor upgrades
 
 ## Design
 
@@ -56,7 +56,10 @@ This file is a shared task-board. When editing, only:
 - [x] Disable upgrades when maxed
 - [x] Style reset button
 - [x] Style reset data
-- [ ] Hide predecessor upgrades before resetting
+- [x] Hide subtractionPoints upgrades until after the first Reset
+- [ ] Separate score and predecessor upgrades
+- [ ] Show levels boost
+- [ ] Rename `Subtraction Points` to `Negative Points`
 
 ## Adding Upgrades
 

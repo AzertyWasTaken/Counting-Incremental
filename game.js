@@ -199,7 +199,7 @@ function getLevelText(item) {
 
 function toNotation(num) {
     if (num < 1000) return num.toString();
-    if (num < 1000000) return (num / 1000).toString() + "K";
+    if (num < 1000000) return (Math.floor(num) / 1000).toString() + "K";
     return (Math.floor(num / 1000) / 1000).toString() + "M";
 }
 
@@ -207,8 +207,11 @@ function toNotation(num) {
 // ================================================================
 
 function getAutoCountBoost() {
-    return getUpgCount("autoCount")
-    + getUpgCount("betterAutoCount") * 5;
+    return (
+        getUpgCount("autoCount")
+        + getUpgCount("betterAutoCount") * 5
+    )
+    * (getCurrCount("level") * 0.05 + 1);
 }
 
 function getScoreBoost() {
@@ -219,7 +222,7 @@ function getScoreBoost() {
     )
     * (getUpgCount("multiplication") + 1)
     * (getUpgCount("predecessor") * 0.2 + 1))
-    * (getUpgCount("level") * 0.05 + 1);
+    * (getCurrCount("level") * 0.05 + 1);
 }
 
 function getCountCooldown() {
@@ -233,8 +236,6 @@ function getSubtractionPoints() {
     if (getCurrCount("score") < RESET_REQUIREMENT) return 0;
     return Math.floor((getCurrCount("score") / RESET_REQUIREMENT) ** 0.5);
 }
-
-const LEVEL_UNLOCK_UPGRADE = "unlockLevelBar";
 
 function getLevelUpReq() {
     return 10 ** getCurrCount("level");
@@ -251,15 +252,15 @@ function updateLevelBarUI() {
 
     if (!section || !levelEl || !levelProgressTextEl || !fillEl) return;
 
-    const unlocked = getUpgCount(LEVEL_UNLOCK_UPGRADE) >= 1;
+    const unlocked = getUpgCount("unlockLevelBar") >= 1;
     section.style.display = unlocked ? "block" : "none";
     if (!unlocked) return;
 
     const progress = toNotation(getCurrCount("xp"));
-    const nextReq = toNotation(getLevelUpReq());
+    const nextReq = getLevelUpReq();
 
     levelEl.textContent = getCurrCount("level");
-    levelProgressTextEl.textContent = `${progress} / ${nextReq}`;
+    levelProgressTextEl.textContent = `${progress} / ${toNotation(nextReq)}`;
 
     const pct = Math.max(0, Math.min(1, progress / nextReq));
     fillEl.style.width = `${Math.round(pct * 1000) / 10}%`;
@@ -345,15 +346,14 @@ function resetForSubtractionPoints() {
     // Update UI.
     document.getElementById("score").textContent = "0";
     document.getElementById("subtraction-points").textContent = toNotation(playerCurrencies.subtractionPoints);
+    incUpgCount("resetCount", 1);
     updateNextResetSubtractionPointsUI();
     updateGainRateUI();
 
     stopCountCooldown();
 
     // Rebuild upgrade nodes so button labels/costs update to reflect reset.
-    const upgradesEl = document.getElementById("upgrades");
-    upgradesEl.innerHTML = "";
-    init();
+    resetUpgrades();
 
     persistPlayerData();
 }
@@ -400,7 +400,7 @@ function count() {
 
     incNumber("score", getScoreBoost());
 
-    const levelUnlocked = getUpgCount(LEVEL_UNLOCK_UPGRADE) >= 1;
+    const levelUnlocked = getUpgCount("unlockLevelBar") >= 1;
 
     if (levelUnlocked) {
         incCurrencyCount("xp", 1);
@@ -430,6 +430,23 @@ document.getElementById("erase-player-data")?.addEventListener("click", () => {
 
 // Create HTML Elements
 // ================================================================
+
+function shouldShowUpgrade(item) {
+    // Hide subtractionPoints upgrades until after the player does his first Reset.
+    // We consider the first Reset completed when subtractionPoints > 0.
+    if (item.currency !== "subtractionPoints") return true;
+    return getUpgCount("resetCount") > 0;
+}
+
+function resetUpgrades() {
+    const upgradesEl = document.getElementById("upgrades");
+    upgradesEl.innerHTML = "";
+
+    for (const item of UPGRADES) {
+        if (!shouldShowUpgrade(item)) continue;
+        createUpgNode(item);
+    }
+}
 
 function createUpgButton(item) {
     const wrap = document.createElement("div");
@@ -472,9 +489,6 @@ function createUpgButton(item) {
     return [upgBtn, costEl, levelEl];
 }
 
-// Init
-// ================================================================
-
 function createUpgNode(item) {
     const [upgBtn, costEl, levelEl] = createUpgButton(item);
 
@@ -499,20 +513,15 @@ function createUpgNode(item) {
     });
 }
 
+// Init
+// ================================================================
+
 function init() {
     updateNextResetSubtractionPointsUI();
     updateScoreUI();
     updateGainRateUI();
     updateLevelBarUI();
-
-    for (const item of UPGRADES) {
-        createUpgNode(item);
-    }
-
-    // Used for testing (ignore)
-    if (false) {
-        playerCurrencies.subtractionPoints = 10**6;
-    }
+    resetUpgrades();
 }
 
 loadPlayerData();
