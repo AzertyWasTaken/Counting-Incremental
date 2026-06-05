@@ -1,86 +1,10 @@
 "use strict";
-let canClick = true;
+import {RESET_REQUIREMENT, UPGRADES, CURRENCIES} from "./config.js"
+import {namesHistory} from "./save.js"
 
+let canClick = true;
 let countCooldownEnd = 0;
 let countCooldownInterval = null;
-
-const RESET_REQUIREMENT = 500;
-
-const UPGRADES = [
-    {
-        name: "successor",
-        text: "Successor",
-        cost: (i) =>
-            [5, 10, 30, 75, 200][i % 5] * 100**Math.floor(i / 5),
-        max: 10,
-        currency: "score",
-        description:
-            "Increase base count multiplier by 1.",
-    },
-    {
-        name: "autoCount",
-        text: "Auto Count",
-        cost: [20, 50, 150, 500, 2000],
-        max: 5,
-        currency: "score",
-        description:
-            "Increase score by 1 every 2s.",
-    },
-    {
-        name: "fastCounting",
-        text: "Fast Counting",
-        cost: [100, 1000, 1000000],
-        max: 3,
-        currency: "score",
-        description:
-            "Decrease count cooldown by 0.25 seconds.",
-    },
-    {
-        name: "addition",
-        text: "Addition",
-        cost: [150, 750, 4000, 20000, 100000],
-        max: 5,
-        currency: "score",
-        description:
-            "Increase base count multiplier by 2.",
-    },
-    {
-        name: "multiplication",
-        text: "Multiplication",
-        cost: 20000,
-        max: 1,
-        currency: "score",
-        description:
-            "Increase count multiplier and cooldown by 100%.",
-    },
-    {
-        name: "betterAutoCount",
-        text: "Better Auto Count",
-        cost: 3,
-        max: 1,
-        currency: "subtractionPoints",
-        description:
-            "Increase base auto count multiplier by 5.",
-    },
-    {
-        name: "predecessor",
-        text: "Predecessor",
-        cost: [5, 100],
-        max: 2,
-        currency: "subtractionPoints",
-        description:
-            "Increase count multiplier by 20%.",
-    },
-    {
-        name: "unlockLevelBar",
-        text: "Level Bar",
-        cost: 10000,
-        max: 1,
-        currency: "subtractionPoints",
-        description:
-            "Unlock Level Bar",
-    },
-];
 
 // Persisted player data
 // ================================================================
@@ -89,6 +13,7 @@ const LS_KEY_PLAYER = "incremental.player";
 
 const playerUpgrades = {};
 const playerCurrencies = {};
+let reseted = false;
 
 function safeParseJSON(raw) {
     try {
@@ -105,24 +30,26 @@ function loadPlayerData() {
     const data = safeParseJSON(raw);
     if (!data || typeof data !== "object") return;
 
+    reseted = data.reseted;
+
     if (data.playerCurrencies && typeof data.playerCurrencies === "object") {
         for (const [k, v] of Object.entries(data.playerCurrencies)) {
-            if (!Number.isFinite(v)) continue;
-            if (v < 0) continue;
-            playerCurrencies[k] = Math.floor(v);
+            if (!Number.isFinite(v) || v < 0) continue;
+            const alt = playerCurrencies[namesHistory.playerCurrencies?.[k]];
+            playerCurrencies[k] = Math.floor(v ?? alt);
         }
     }
 
     if (data.playerUpgrades && typeof data.playerUpgrades === "object") {
         for (const [k, v] of Object.entries(data.playerUpgrades)) {
-            if (!Number.isFinite(v)) continue;
-            if (v < 0) continue;
-            playerUpgrades[k] = Math.floor(v);
+            if (!Number.isFinite(v) || v < 0) continue;
+            const alt = playerUpgrades[namesHistory.playerUpgrades?.[k]];
+            playerUpgrades[k] = Math.floor(v ?? alt);
         }
     }
 
-    document.getElementById("score").textContent = toNotation(playerCurrencies.score);
-    document.getElementById("subtraction-points").textContent = toNotation(playerCurrencies.subtractionPoints);
+    document.getElementById("score").textContent = toNotation(getCurrCount("point"));
+    document.getElementById("subtraction-points").textContent = toNotation(getCurrCount("resetPoint"));
 }
 
 function persistPlayerData() {
@@ -131,7 +58,8 @@ function persistPlayerData() {
             LS_KEY_PLAYER,
             JSON.stringify({
                 playerCurrencies,
-                playerUpgrades
+                playerUpgrades,
+                reseted
             })
         );
     } catch {
@@ -141,6 +69,25 @@ function persistPlayerData() {
 
 // Helpers
 // ================================================================
+
+const PREFIXES = ["K", "M", "B", "T"];
+
+function toNotation(num, digits = 6) {
+    const magnitude = Math.log10(num);
+    if (magnitude < digits + 2) return writeCommas(num);
+
+    const illion = Math.floor(magnitude / 3);
+    const prefix = PREFIXES[illion - 1];
+    const number = Math.floor(num / 10**(illion * 3 - digits)) / 10**digits
+
+    return number.toString() + prefix;
+}
+
+function getCostText(item) {
+    return isMaxed(item)
+    ? "MAXED"
+    : toNotation(getUpgCost(item), 4);
+}
 
 function getUpgCount(name) {
     return playerUpgrades[name] ?? 0;
@@ -152,10 +99,6 @@ function incUpgCount(name, inc) {
 
 function getCurrCount(name) {
     return playerCurrencies[name] ?? 0;
-}
-
-function incCurrencyCount(name, inc) {
-    playerCurrencies[name] = getCurrCount(name) + inc;
 }
 
 function getUpgCost(item) {
@@ -173,68 +116,59 @@ function isMaxed(item) {
     return getUpgCount(item.name) >= item.max;
 }
 
-function incNumber(currency, inc) {
-    incCurrencyCount(currency, inc);
+function incCurrency(name, inc) {
+    playerCurrencies[name] = getCurrCount(name) + inc;
     updateScoreUI();
-    updateNextResetSubtractionPointsUI();
+    updateNextResetResetPointUI();
     persistPlayerData();
 }
 
 function buyUpg(cost, currency, callback) {
     if (getCurrCount(currency) >= cost) {
-        incNumber(currency, -cost);
+        incCurrency(currency, -cost);
         callback();
     }
-}
-
-function getCostText(item) {
-    return isMaxed(item)
-    ? "MAXED"
-    : toNotation(getUpgCost(item));
 }
 
 function getLevelText(item) {
     return `Level: ${getUpgCount(item.name)} / ${item.max}`;
 }
 
-function toNotation(num) {
-    if (num < 1000) return num.toString();
-    if (num < 1000000) return (Math.floor(num) / 1000).toString() + "K";
-    return (Math.floor(num / 1000) / 1000).toString() + "M";
+function writeCommas(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // Formulas
 // ================================================================
 
 function getAutoCountBoost() {
-    return (
-        getUpgCount("autoCount")
-        + getUpgCount("betterAutoCount") * 5
+    return Math.floor((
+        getUpgCount("incAutoCount")
+        + getUpgCount("incAutoCount2") * 5
     )
-    * (getCurrCount("level") * 0.05 + 1);
+    * (getCurrCount("level") * 0.05 + 1));
 }
 
 function getScoreBoost() {
     return Math.floor((1
-        + getUpgCount("addition") * 2
-        + getUpgCount("successor")
-        + playerCurrencies.subtractionPoints
+        + getUpgCount("incCount")
+        + getUpgCount("incCount2") * 2
+        + getUpgCount("incCount3") * 2
     )
-    * (getUpgCount("multiplication") + 1)
-    * (getUpgCount("predecessor") * 0.2 + 1))
-    * (getCurrCount("level") * 0.05 + 1);
+    * (getUpgCount("addCountAndCooldown") + 1)
+    * (getUpgCount("addCount") * 0.2 + 1)
+    * (getCurrCount("level") * 0.05 + 1));
 }
 
 function getCountCooldown() {
     return (1000
-        - getUpgCount("fastCounting") * 250
+        - getUpgCount("decCountCooldown") * 250
     ) 
-    * (getUpgCount("multiplication") + 1);
+    * (getUpgCount("addCountAndCooldown") + 1);
 }
 
-function getSubtractionPoints() {
-    if (getCurrCount("score") < RESET_REQUIREMENT) return 0;
-    return Math.floor((getCurrCount("score") / RESET_REQUIREMENT) ** 0.5);
+function getResetPoint() {
+    return Math.floor((getCurrCount("point") / RESET_REQUIREMENT) ** 0.5);
 }
 
 function getLevelUpReq() {
@@ -266,14 +200,14 @@ function updateLevelBarUI() {
     fillEl.style.width = `${Math.round(pct * 1000) / 10}%`;
 }
 
-function updateNextResetSubtractionPointsUI() {
+function updateNextResetResetPointUI() {
     const el = document.getElementById("next-reset-subtraction-points");
     if (!el) return;
-    el.textContent = toNotation(getSubtractionPoints());
+    el.textContent = toNotation(getResetPoint());
 }
 
 function updateScoreUI() {
-    document.getElementById("score").textContent = toNotation(playerCurrencies.score);
+    document.getElementById("score").textContent = toNotation(getCurrCount("point"));
 }
 
 function updateGainRateUI() {
@@ -281,8 +215,8 @@ function updateGainRateUI() {
     const autoEl = document.getElementById("gain-rate-auto");
     if (!manualEl || !autoEl) return;
 
-    manualEl.textContent = parseInt(getScoreBoost());
-    autoEl.textContent = parseInt(getAutoCountBoost());
+    manualEl.textContent = getScoreBoost();
+    autoEl.textContent = getAutoCountBoost();
 }
 
 // Erase Data
@@ -296,8 +230,8 @@ function erasePlayerData() {
     }
 
     // Reset in-memory state.
-    playerCurrencies.score = 0;
-    playerCurrencies.subtractionPoints = 0;
+    playerCurrencies.point = 0;
+    playerCurrencies.resetPoint = 0;
 
     for (const key of Object.keys(playerUpgrades)) {
         delete playerUpgrades[key];
@@ -306,7 +240,7 @@ function erasePlayerData() {
     // Update UI.
     document.getElementById("score").textContent = "0";
     document.getElementById("subtraction-points").textContent = "0";
-    updateNextResetSubtractionPointsUI();
+    updateNextResetResetPointUI();
 
     stopCountCooldown();
 
@@ -330,24 +264,25 @@ function stopCountCooldown() {
     cooldownEl.textContent = "0";
 }
 
-function resetForSubtractionPoints() {
-    if (playerCurrencies.score < RESET_REQUIREMENT) return;
+function resetForResetPoint() {
+    if (playerCurrencies.point < RESET_REQUIREMENT) return;
 
     // Earn subtraction points from current score
-    playerCurrencies.subtractionPoints += getSubtractionPoints();
-    playerCurrencies.score = 0;
+    incCurrency("resetPoint", getResetPoint());
+    playerCurrencies.point = 0;
+    reseted = true;
 
-    // Reset ONLY score-based upgrades
+    // Reset ONLY point-based upgrades
     for (const item of UPGRADES) {
-        if (item.currency !== "score") continue;
+        if (item.currency !== "point") continue;
         delete playerUpgrades[item.name];
     }
 
     // Update UI.
     document.getElementById("score").textContent = "0";
-    document.getElementById("subtraction-points").textContent = toNotation(playerCurrencies.subtractionPoints);
+    document.getElementById("subtraction-points").textContent = toNotation(getCurrCount("resetPoint"));
     incUpgCount("resetCount", 1);
-    updateNextResetSubtractionPointsUI();
+    updateNextResetResetPointUI();
     updateGainRateUI();
 
     stopCountCooldown();
@@ -388,8 +323,8 @@ function checkLevelUp() {
     for (let i = 0; i < 100; i++) {
         const requirement = getLevelUpReq();
         if (getCurrCount("xp") >= requirement) {
-            incCurrencyCount("level", 1);
-            incCurrencyCount("xp", -requirement);
+            incCurrency("level", 1);
+            incCurrency("xp", -requirement);
         }
         else break;
     }
@@ -398,12 +333,12 @@ function checkLevelUp() {
 function count() {
     if (!canClick) return;
 
-    incNumber("score", getScoreBoost());
+    incCurrency("point", getScoreBoost());
 
     const levelUnlocked = getUpgCount("unlockLevelBar") >= 1;
 
     if (levelUnlocked) {
-        incCurrencyCount("xp", 1);
+        incCurrency("xp", 1);
         checkLevelUp();
         updateLevelBarUI();
     }
@@ -413,13 +348,13 @@ function count() {
 }
 
 setInterval(() => {
-    incNumber("score", getAutoCountBoost());
+    incCurrency("point", getAutoCountBoost());
 }, 2000)
 
 document.getElementById("count").addEventListener("click", count);
 
 document.getElementById("reset-subtraction").addEventListener("click", () => {
-    resetForSubtractionPoints();
+    resetForResetPoint();
 });
 
 document.getElementById("erase-player-data")?.addEventListener("click", () => {
@@ -432,10 +367,7 @@ document.getElementById("erase-player-data")?.addEventListener("click", () => {
 // ================================================================
 
 function shouldShowUpgrade(item) {
-    // Hide subtractionPoints upgrades until after the player does his first Reset.
-    // We consider the first Reset completed when subtractionPoints > 0.
-    if (item.currency !== "subtractionPoints") return true;
-    return getUpgCount("resetCount") > 0;
+    return item.currency !== "resetPoint" || reseted;
 }
 
 function resetUpgrades() {
@@ -459,10 +391,12 @@ function createUpgButton(item) {
     costEl.className = "cost-value";
     costEl.textContent = getCostText(item);
 
+    const currInfo = CURRENCIES[item.currency];
+
     const currencyIcon = document.createElement("span");
     currencyIcon.className = `cost-currency ${item.currency}`;
-    currencyIcon.textContent = item.currency === "score" ? "P" : "S";
-    currencyIcon.title = item.currency === "score" ? "Score" : "Subtraction Points";
+    currencyIcon.textContent = currInfo.symbol;
+    currencyIcon.title = currInfo.name;
 
     costWrap.appendChild(costEl);
     costWrap.appendChild(currencyIcon);
@@ -517,7 +451,7 @@ function createUpgNode(item) {
 // ================================================================
 
 function init() {
-    updateNextResetSubtractionPointsUI();
+    updateNextResetResetPointUI();
     updateScoreUI();
     updateGainRateUI();
     updateLevelBarUI();
@@ -526,3 +460,15 @@ function init() {
 
 loadPlayerData();
 init();
+
+// Test
+// ================================================================
+
+function initTest() {
+    document.getElementById("test-warning").textContent = "DEV BUILD: debug entrypoints enabled (do not publish this file).";
+
+    playerCurrencies.point = 10000;
+    playerUpgrades.unlockLevelBar = 1;
+}
+
+initTest();
