@@ -52,7 +52,7 @@ This file is a shared task-board. When editing, only:
 - [x] Show levels boost
 - [x] Rename `Subtraction Points` to `Negative Points`
 - [ ] Separate score and predecessor upgrades
-- [ ] Copy currency names in upgrades descriptions
+- [ ] Auto copy currency names in upgrades descriptions
 
 ## Adding Upgrades
 

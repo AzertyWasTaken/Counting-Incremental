@@ -471,4 +471,4 @@ function initTest() {
     playerUpgrades.unlockLevelBar = 1;
 }
 
-initTest();
+// initTest();
