@@ -2,7 +2,7 @@
 import {RESET_REQUIREMENT, UPGRADES, CURRENCIES} from "./config.js"
 import {namesHistory} from "./save.js"
 
-let canClick = true;
+let canCount = true;
 let countCooldownEnd = 0;
 let countCooldownInterval = null;
 
@@ -48,8 +48,8 @@ function loadPlayerData() {
         }
     }
 
-    document.getElementById("score").textContent = toNotation(getCurrCount("point"));
-    document.getElementById("subtraction-points").textContent = toNotation(getCurrCount("resetPoint"));
+    updatePointUI();
+    updateResetPointUI();
 }
 
 function persistPlayerData() {
@@ -118,7 +118,7 @@ function isMaxed(item) {
 
 function incCurrency(name, inc) {
     playerCurrencies[name] = getCurrCount(name) + inc;
-    updateScoreUI();
+    updatePointUI();
     updateNextResetResetPointUI();
     persistPlayerData();
 }
@@ -172,7 +172,8 @@ function getResetPoint() {
 }
 
 function getLevelUpReq() {
-    return 10 ** getCurrCount("level");
+    const n = getCurrCount("level");
+    return [1, 2, 5][n % 3] * 10**Math.floor(n / 3) * 10;
 }
 
 // Display
@@ -194,20 +195,22 @@ function updateLevelBarUI() {
     const nextReq = getLevelUpReq();
 
     levelEl.textContent = getCurrCount("level");
-    levelProgressTextEl.textContent = `${progress} / ${toNotation(nextReq)}`;
+    levelProgressTextEl.textContent = `${progress} / ${toNotation(nextReq)} Xp`;
 
     const pct = Math.max(0, Math.min(1, progress / nextReq));
     fillEl.style.width = `${Math.round(pct * 1000) / 10}%`;
 }
 
 function updateNextResetResetPointUI() {
-    const el = document.getElementById("next-reset-subtraction-points");
-    if (!el) return;
-    el.textContent = toNotation(getResetPoint());
+    document.getElementById("next-reset-subtraction-points").textContent = "-" + toNotation(getResetPoint());
 }
 
-function updateScoreUI() {
+function updatePointUI() {
     document.getElementById("score").textContent = toNotation(getCurrCount("point"));
+}
+
+function updateResetPointUI() {
+    document.getElementById("subtraction-points").textContent = "-" + toNotation(getCurrCount("resetPoint"));
 }
 
 function updateGainRateUI() {
@@ -238,8 +241,8 @@ function erasePlayerData() {
     }
 
     // Update UI.
-    document.getElementById("score").textContent = "0";
-    document.getElementById("subtraction-points").textContent = "0";
+    updatePointUI();
+    updateResetPointUI();
     updateNextResetResetPointUI();
 
     stopCountCooldown();
@@ -254,7 +257,8 @@ function erasePlayerData() {
 // ================================================================
 
 function stopCountCooldown() {
-    canClick = true;
+    canCount = true;
+    document.getElementById("count").disabled = false;
     countCooldownEnd = 0;
 
     if (countCooldownInterval) clearInterval(countCooldownInterval);
@@ -279,9 +283,9 @@ function resetForResetPoint() {
     }
 
     // Update UI.
-    document.getElementById("score").textContent = "0";
-    document.getElementById("subtraction-points").textContent = toNotation(getCurrCount("resetPoint"));
     incUpgCount("resetCount", 1);
+    updatePointUI();
+    updateResetPointUI();
     updateNextResetResetPointUI();
     updateGainRateUI();
 
@@ -294,7 +298,8 @@ function resetForResetPoint() {
 }
 
 function startCountCooldown() {
-    canClick = false;
+    canCount = false;
+    document.getElementById("count").disabled = true;
     countCooldownEnd = Date.now() + getCountCooldown();
 
     const cooldownEl = document.getElementById("count-cooldown");
@@ -306,10 +311,7 @@ function startCountCooldown() {
     countCooldownInterval = setInterval(() => {
         const remainingMs = countCooldownEnd - Date.now();
         if (remainingMs <= 0) {
-            if (countCooldownInterval) clearInterval(countCooldownInterval);
-            countCooldownInterval = null;
-            canClick = true;
-            cooldownEl.textContent = "0";
+            stopCountCooldown();
             return;
         }
 
@@ -331,7 +333,7 @@ function checkLevelUp() {
 }
 
 function count() {
-    if (!canClick) return;
+    if (!canCount) return;
 
     incCurrency("point", getScoreBoost());
 
@@ -380,18 +382,12 @@ function resetUpgrades() {
     }
 }
 
-function createUpgButton(item) {
-    const wrap = document.createElement("div");
-    wrap.className = "upgrade-card";
-
+function createCostWrap(item, currInfo) {
     const costWrap = document.createElement("div");
     costWrap.className = "upgrade-cost";
 
     const costEl = document.createElement("span");
     costEl.className = "cost-value";
-    costEl.textContent = getCostText(item);
-
-    const currInfo = CURRENCIES[item.currency];
 
     const currencyIcon = document.createElement("span");
     currencyIcon.className = `cost-currency ${item.currency}`;
@@ -401,14 +397,21 @@ function createUpgButton(item) {
     costWrap.appendChild(costEl);
     costWrap.appendChild(currencyIcon);
 
+    return [costWrap, costEl];
+}
+
+function createUpgButton(item) {
+    const wrap = document.createElement("div");
+    wrap.className = "upgrade-card";
+
     const upgBtn = document.createElement("button");
     upgBtn.className = "upgrade-buy";
     upgBtn.textContent = item.text;
-    upgBtn.disabled = isMaxed(item);
+
+    const [costWrap, costEl] = createCostWrap(item, CURRENCIES[item.currency]);
 
     const levelEl = document.createElement("p");
     levelEl.className = "upgrade-level";
-    levelEl.textContent = getLevelText(item);
 
     const desc = document.createElement("p");
     desc.className = "description";
@@ -423,8 +426,16 @@ function createUpgButton(item) {
     return [upgBtn, costEl, levelEl];
 }
 
+function updateUpgrade(item, costEl, levelEl, upgBtn) {
+    const sign = item.currency === "resetPoint" ? "-" : "";
+    costEl.textContent = sign + getCostText(item);
+    levelEl.textContent = getLevelText(item);
+    upgBtn.disabled = isMaxed(item);
+}
+
 function createUpgNode(item) {
     const [upgBtn, costEl, levelEl] = createUpgButton(item);
+    updateUpgrade(item, costEl, levelEl, upgBtn);
 
     upgBtn.addEventListener("click", () => {
         if (isMaxed(item)) return;
@@ -432,11 +443,7 @@ function createUpgNode(item) {
         buyUpg(getUpgCost(item), item.currency, () => {
             incUpgCount(item.name, 1);
             updateGainRateUI();
-
-            // UI refresh
-            costEl.textContent = getCostText(item);
-            levelEl.textContent = getLevelText(item);
-            upgBtn.disabled = isMaxed(item);
+            updateUpgrade(item, costEl, levelEl, upgBtn);
 
             if (item.name === "unlockLevelBar") {
                 playerCurrencies.level = Math.max(1, playerCurrencies.level);
@@ -452,7 +459,7 @@ function createUpgNode(item) {
 
 function init() {
     updateNextResetResetPointUI();
-    updateScoreUI();
+    updatePointUI();
     updateGainRateUI();
     updateLevelBarUI();
     resetUpgrades();

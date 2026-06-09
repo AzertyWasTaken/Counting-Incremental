@@ -23,24 +23,23 @@ This file is a shared task-board. When editing, only:
 - [x] Max upgrading system
 - [x] Reset for boosts (predecessor & subtraction points)
 - [x] Create large numbers notation
+- [x] Subtraction upgrades
 - [x] Add levels mechanic
-
-### Subtraction upgrades
-
-- [x] +5 auto count points
-- [x] Add 10% to the score (floored)
-- [x] Unlock level bar (division & modulo points)
+- [ ] Upgrade that boost xp gain
+  - [ ] Unlock with level bar
+- [x] Make negative number actually negative <
+- [ ] Currency obtainable by new click button with longer, separate cooldown, unlocked by reaching Level 10, named Successor
+- [ ] New reset layer that reset subtractions and levels but not Successor, named Predecessor
 
 ### G/Ideas
 
-- New currency and button (not reseted by subtraction)
-- Milestones
-- Challenges
-- Upgrading function
+- Multiply levels boost
+- Milestone boosts
+- Challenges (boost stuff when completed)
 - 0.1s cooldown for buying upgrades
 - Upgrades to keep stuff on reset
 - Increase count by 10% per Successor upgrades
-- Table for storing currency infos
+- Compound boost
 
 ## Design
 

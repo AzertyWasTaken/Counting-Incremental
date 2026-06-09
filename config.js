@@ -4,7 +4,7 @@ export const RESET_REQUIREMENT = 500;
 export const UPGRADES = [
     {
         name: "incCount",
-        text: "Successor",
+        text: "Succession",
         cost: (i) =>
             [5, 10, 30, 75, 200][i % 5] * 100**Math.floor(i / 5),
         max: 10,
@@ -32,7 +32,7 @@ export const UPGRADES = [
     },
     {
         name: "incCount2",
-        text: "Successor 2",
+        text: "Succession 2",
         cost: [150, 750, 4000, 20000, 100000],
         max: 5,
         currency: "point",
@@ -50,7 +50,7 @@ export const UPGRADES = [
     },
     {
         name: "incCount3",
-        text: "Successor 3",
+        text: "Succession 3",
         cost: [1, 2, 5],
         max: 3,
         currency: "resetPoint",
@@ -96,9 +96,9 @@ export const CURRENCIES = {
         symbol: "Z",
     },
     "level": {
-        name: "Addend",
+        name: "Level",
     },
     "xp": {
-        name: "Successor",
+        name: "Xp",
     },
 };

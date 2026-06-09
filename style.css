@@ -160,19 +160,6 @@ label {
     margin: 0;
 }
 
-.upgrade-buy:active {
-    transform: translateY(2px);
-}
-
-.upgrade-buy:disabled {
-    background: #606060;
-    box-shadow: none;
-}
-
-.upgrade-buy:disabled:active {
-    transform: translateY(0);
-}
-
 /* Button */
 /* ================================================================ */
 
