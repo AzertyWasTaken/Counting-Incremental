@@ -77,16 +77,10 @@ function toNotation(num, digits = 6) {
     if (magnitude < digits + 2) return writeCommas(num);
 
     const illion = Math.floor(magnitude / 3);
-    const prefix = PREFIXES[illion - 1];
+    const postfix = PREFIXES[illion - 1];
     const number = Math.floor(num / 10**(illion * 3 - digits)) / 10**digits
 
-    return number.toString() + prefix;
-}
-
-function getCostText(item) {
-    return isMaxed(item)
-    ? "MAXED"
-    : toNotation(getUpgCost(item), 4);
+    return number.toString() + postfix;
 }
 
 function getUpgCount(name) {
@@ -158,6 +152,10 @@ function getScoreBoost() {
     * (getUpgCount("addCountAndCooldown") + 1)
     * (getUpgCount("addCount") * 0.2 + 1)
     * (getCurrCount("level") * 0.05 + 1));
+}
+
+function getXpBoost() {
+    return getUpgCount("incXp") + 1;
 }
 
 function getCountCooldown() {
@@ -232,7 +230,7 @@ function erasePlayerData() {
         // ignore
     }
 
-    // Reset in-memory state.
+    // Reset in-memory state
     playerCurrencies.point = 0;
     playerCurrencies.resetPoint = 0;
 
@@ -240,14 +238,14 @@ function erasePlayerData() {
         delete playerUpgrades[key];
     }
 
-    // Update UI.
+    // Update UI
     updatePointUI();
     updateResetPointUI();
     updateNextResetResetPointUI();
 
     stopCountCooldown();
 
-    // Rebuild upgrade nodes so button labels reset.
+    // Rebuild upgrade nodes so button labels reset
     const upgradesEl = document.getElementById("upgrades");
     upgradesEl.innerHTML = "";
     init();
@@ -282,7 +280,7 @@ function resetForResetPoint() {
         delete playerUpgrades[item.name];
     }
 
-    // Update UI.
+    // Update UI
     incUpgCount("resetCount", 1);
     updatePointUI();
     updateResetPointUI();
@@ -291,7 +289,7 @@ function resetForResetPoint() {
 
     stopCountCooldown();
 
-    // Rebuild upgrade nodes so button labels/costs update to reflect reset.
+    // Rebuild upgrade nodes so button labels/costs update to reflect reset
     resetUpgrades();
 
     persistPlayerData();
@@ -369,7 +367,8 @@ document.getElementById("erase-player-data")?.addEventListener("click", () => {
 // ================================================================
 
 function shouldShowUpgrade(item) {
-    return item.currency !== "resetPoint" || reseted;
+    return (item.currency !== "resetPoint" || reseted)
+    && !item.unlock || getUpgCount(item.unlock) > 0;
 }
 
 function resetUpgrades() {
@@ -397,7 +396,7 @@ function createCostWrap(item, currInfo) {
     costWrap.appendChild(costEl);
     costWrap.appendChild(currencyIcon);
 
-    return [costWrap, costEl];
+    return [costWrap, costEl, currencyIcon];
 }
 
 function createUpgButton(item) {
@@ -408,7 +407,7 @@ function createUpgButton(item) {
     upgBtn.className = "upgrade-buy";
     upgBtn.textContent = item.text;
 
-    const [costWrap, costEl] = createCostWrap(item, CURRENCIES[item.currency]);
+    const [costWrap, costEl, currencyIconEl] = createCostWrap(item, CURRENCIES[item.currency]);
 
     const levelEl = document.createElement("p");
     levelEl.className = "upgrade-level";
@@ -423,19 +422,27 @@ function createUpgButton(item) {
     wrap.appendChild(desc);
     document.getElementById("upgrades").appendChild(wrap);
 
-    return [upgBtn, costEl, levelEl];
+    return [upgBtn, costEl, currencyIconEl, levelEl];
 }
 
-function updateUpgrade(item, costEl, levelEl, upgBtn) {
-    const sign = item.currency === "resetPoint" ? "-" : "";
-    costEl.textContent = sign + getCostText(item);
+function updateUpgrade(item, costEl, currencyIconEl, levelEl, upgBtn) {
+    const maxed = isMaxed(item);
+
+    // When maxed: show MAXED without the negative sign and hide the currency icon.
+    let costText = maxed ? "MAXED" : toNotation(getUpgCost(item), 4);
+    if (!maxed && item.currency === "resetPoint") costText = "-" + costText;
+
+    costEl.textContent = costText;
+
+    currencyIconEl.style.display = maxed ? "none" : "inline-flex";
+
     levelEl.textContent = getLevelText(item);
-    upgBtn.disabled = isMaxed(item);
+    upgBtn.disabled = maxed;
 }
 
 function createUpgNode(item) {
-    const [upgBtn, costEl, levelEl] = createUpgButton(item);
-    updateUpgrade(item, costEl, levelEl, upgBtn);
+    const [upgBtn, costEl, currencyIconEl, levelEl] = createUpgButton(item);
+    updateUpgrade(item, costEl, currencyIconEl, levelEl, upgBtn);
 
     upgBtn.addEventListener("click", () => {
         if (isMaxed(item)) return;
@@ -449,6 +456,7 @@ function createUpgNode(item) {
                 playerCurrencies.level = Math.max(1, playerCurrencies.level);
             }
 
+            if (item.name === "unlockLevelBar") resetUpgrades();
             persistPlayerData();
         });
     });
