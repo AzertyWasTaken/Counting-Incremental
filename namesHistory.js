@@ -1,6 +1,6 @@
 "use strict";
 export const namesHistory = {
-    playerUpgrades: {
+    upgrades: {
         incCount: "successor",
         incCount2: "addition",
         incAutoCount: "autoCount",
@@ -9,8 +9,11 @@ export const namesHistory = {
         addCountAndCooldown: "multiplication",
         addCount: "predecessor",
     },
-    playerCurrencies: {
+
+    currencies: {
         point: "score",
         resetPoint: "subtractionPoints",
-    }
-}
+    },
+
+    unlocked: {}
+};

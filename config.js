@@ -24,11 +24,11 @@ export const UPGRADES = [
     {
         name: "decCountCooldown",
         text: "Faster Count",
-        cost: [100, 1000, 1000000],
+        cost: [100, 1000, 10**6],
         max: 3,
         currency: "point",
         description:
-            "Decrease count cooldown by 0.25 seconds.",
+            "Decrease count cooldown by 0.25s.",
     },
     {
         name: "incCount2",
@@ -47,6 +47,16 @@ export const UPGRADES = [
         currency: "point",
         description:
             "Increase count multiplier and cooldown by 100%.",
+    },
+    {
+        name: "incXp",
+        text: "Lesson",
+        cost: [10**6, 10**9, 10**12],
+        max: 3,
+        currency: "point",
+        unlock: "unlockLevelBar",
+        description:
+            "Increase base Xp multiplier by 1.",
     },
     {
         name: "incCount3",
@@ -68,9 +78,9 @@ export const UPGRADES = [
     },
     {
         name: "addCount",
-        text: "Predecessor",
-        cost: [10, 100],
-        max: 2,
+        text: "Predecession",
+        cost: [10, 50, 1000],
+        max: 3,
         currency: "resetPoint",
         description:
             "Increase count multiplier by 20%.",
@@ -78,11 +88,38 @@ export const UPGRADES = [
     {
         name: "unlockLevelBar",
         text: "New Feature",
-        cost: 1000,
+        cost: 100,
         max: 1,
         currency: "resetPoint",
         description:
             "Unlock Level Bar (boost number).",
+    },
+    {
+        name: "addCount2",
+        text: "Predecession 2",
+        cost: [10, 10**5],
+        max: 2,
+        currency: "point2",
+        description:
+            "Increase count multiplier by 10%.",
+    },
+    {
+        name: "decIncrementCooldown",
+        text: "Faster Increment",
+        cost: [100, 10**4, 10**6, 10**9, 10**12],
+        max: 5,
+        currency: "point2",
+        description:
+            "Decrease increment cooldown by 1s.",
+    },
+    {
+        name: "incXp2",
+        text: "Lesson 2",
+        cost: [10**8],
+        max: 1,
+        currency: "point2",
+        description:
+            "Each increment worth 5 Xp.",
     },
 ];
 
@@ -94,6 +131,10 @@ export const CURRENCIES = {
     "resetPoint": {
         name: "Negative Number",
         symbol: "Z",
+    },
+    "point2": {
+        name: "Successor",
+        symbol: "S",
     },
     "level": {
         name: "Level",

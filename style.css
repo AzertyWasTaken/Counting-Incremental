@@ -74,6 +74,7 @@ label {
     align-items: center;
     gap: 6px;
     font-weight: 700;
+    font-size: 28px;
 }
 
 /* Upgrade card */
@@ -131,6 +132,12 @@ label {
     color: #FF6040;
     background: rgba(255, 96, 64, 0.1);
     border-color: rgba(255, 96, 64, 0.2);
+}
+
+.cost-currency.point2 {
+    color: #FFE040;
+    background: rgba(255, 224, 64, 0.1);
+    border-color: rgba(255, 224, 64, 0.2);
 }
 
 .description {
@@ -206,5 +213,5 @@ button:disabled {
 
 .level-bar-fill {
     min-height: 10px;
-    background: #FFE000;
+    background: #FFE040;
 }

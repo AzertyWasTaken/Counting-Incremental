@@ -16,20 +16,33 @@ This file is a shared task-board. When editing, only:
 - [x] Create currency test tool
 - [x] Move upgrades and currencies into a module
 - [x] Restore player data after rename
+- [x] Refractor into modules
+- [ ] Auto copy currency names in upgrades descriptions
 
 ## Gameplay
 
 - [x] Counting upgrades
 - [x] Max upgrading system
 - [x] Reset for boosts (predecessor & subtraction points)
-- [x] Create large numbers notation
 - [x] Subtraction upgrades
 - [x] Add levels mechanic
-- [ ] Upgrade that boost xp gain
-  - [ ] Unlock with level bar
-- [x] Make negative number actually negative <
-- [ ] Currency obtainable by new click button with longer, separate cooldown, unlocked by reaching Level 10, named Successor
-- [ ] New reset layer that reset subtractions and levels but not Successor, named Predecessor
+- [x] Upgrade that boosts xp gain
+- [x] Currency obtainable by new click button (Successor)
+- [ ] New reset layer that reset subtractions and levels but not Successor, (Predecessor)
+- [ ] Move tests to module script
+
+## Design
+
+- [x] Create favicon
+- [x] Display currencies gain rate
+- [x] Revamp upgrade card design
+- [x] Create large numbers notation
+- [x] Add levels bar
+- [x] Make negative number actually negative
+- [x] Remove currency icon when upgrade is maxed
+- [x] Hide negative sign on maxed resetPoint upgrades
+- [ ] Display xp gain per count
+- [ ] Separate score and predecessor upgrades
 
 ### G/Ideas
 
@@ -38,20 +51,11 @@ This file is a shared task-board. When editing, only:
 - Challenges (boost stuff when completed)
 - 0.1s cooldown for buying upgrades
 - Upgrades to keep stuff on reset
-- Increase count by 10% per Successor upgrades
+- Upgrades increase count by 10% per Successor
 - Compound boost
-
-## Design
-
-- [x] Reset player data
-- [x] Create favicons
-- [x] Display score gain rate
-- [x] Revamp upgrade card design
-- [x] Hide subtractionPoints upgrades before the first Reset
-- [x] Show levels boost
-- [x] Rename `Subtraction Points` to `Negative Points`
-- [ ] Separate score and predecessor upgrades
-- [ ] Auto copy currency names in upgrades descriptions
+- Decrease autoClick cooldown
+- Divide level req
+- Root level req
 
 ## Adding Upgrades
 
