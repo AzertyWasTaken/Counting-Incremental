@@ -1,5 +1,5 @@
 "use strict";
-export const RESET_REQUIREMENT = 500;
+import {Formulas} from "./formulas.js";
 
 export const UPGRADES = [
     {
@@ -15,7 +15,7 @@ export const UPGRADES = [
     {
         name: "incAutoCount",
         text: "Auto Count",
-        cost: [20, 50, 150, 500, 2000],
+        cost: [20, 50, 150, 500, 2_000],
         max: 5,
         currency: "point",
         description:
@@ -24,7 +24,7 @@ export const UPGRADES = [
     {
         name: "decCountCooldown",
         text: "Faster Count",
-        cost: [100, 1000, 10**6],
+        cost: [100, 1_000, 10**6],
         max: 3,
         currency: "point",
         description:
@@ -33,7 +33,7 @@ export const UPGRADES = [
     {
         name: "incCount2",
         text: "Succession 2",
-        cost: [150, 750, 4000, 20000, 100000],
+        cost: [150, 750, 4_000, 20_000, 100_000],
         max: 5,
         currency: "point",
         description:
@@ -42,7 +42,7 @@ export const UPGRADES = [
     {
         name: "addCountAndCooldown",
         text: "Addition",
-        cost: 20000,
+        cost: 20_000,
         max: 1,
         currency: "point",
         description:
@@ -79,7 +79,7 @@ export const UPGRADES = [
     {
         name: "addCount",
         text: "Predecession",
-        cost: [10, 50, 1000],
+        cost: [10, 50, 1_000],
         max: 3,
         currency: "resetPoint",
         description:
@@ -97,7 +97,7 @@ export const UPGRADES = [
     {
         name: "addCount2",
         text: "Predecession 2",
-        cost: [10, 10**5],
+        cost: [10, 100_000],
         max: 2,
         currency: "point2",
         description:
@@ -106,7 +106,7 @@ export const UPGRADES = [
     {
         name: "decIncrementCooldown",
         text: "Faster Increment",
-        cost: [100, 10**4, 10**6, 10**9, 10**12],
+        cost: [100, 10_000, 10**6, 10**9, 10**12],
         max: 5,
         currency: "point2",
         description:
@@ -121,6 +121,33 @@ export const UPGRADES = [
         description:
             "Each increment worth 5 Xp.",
     },
+    {
+        name: "mulCount",
+        text: "Multiplication",
+        cost: [1, 1_000, 10**6],
+        max: 3,
+        currency: "reset2Point",
+        description:
+            "Multiply number by x1.05.",
+    },
+    {
+        name: "incIncrement",
+        text: "More Increments",
+        cost: [10, 10**12],
+        max: 2,
+        currency: "reset2Point",
+        description:
+            "Increase base increment multiplier by 1.",
+    },
+    {
+        name: "boostLevel",
+        text: "Boost Levels",
+        cost: 10_000,
+        max: 1,
+        currency: "reset2Point",
+        description:
+            "Increase level boost by 1% per level.",
+    },
 ];
 
 export const CURRENCIES = {
@@ -131,6 +158,10 @@ export const CURRENCIES = {
     "resetPoint": {
         name: "Negative Number",
         symbol: "Z",
+    },
+    "reset2Point": {
+        name: "Predecessor",
+        symbol: "P",
     },
     "point2": {
         name: "Successor",
@@ -143,3 +174,26 @@ export const CURRENCIES = {
         name: "Xp",
     },
 };
+
+export const RESETS = [
+    {
+        text: "Reset",
+        reqCurrency: "point",
+        reqValue: 500,
+        gainCurrency: "resetPoint",
+        gainValue: (n) => Formulas.nextResetPoint(n),
+        reset: ["point"],
+        description:
+            "Reset Number upgrades.",
+    },
+    {
+        text: "Predecessor",
+        reqCurrency: "resetPoint",
+        reqValue: 100_000,
+        gainCurrency: "reset2Point",
+        gainValue: (n) => Formulas.nextReset2Point(n),
+        reset: ["point", "resetPoint"],
+        description:
+            "Reset Number and Negative Number upgrades.",
+    },
+]

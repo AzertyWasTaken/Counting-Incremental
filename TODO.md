@@ -17,7 +17,12 @@ This file is a shared task-board. When editing, only:
 - [x] Move upgrades and currencies into a module
 - [x] Restore player data after rename
 - [x] Refractor into modules
+- [x] Automatic reset cards generation
+- [x] Notation function that includes Negative Numbers
 - [ ] Auto copy currency names in upgrades descriptions
+  - [ ] Use wrapping `:`
+- [ ] Methods to create elements
+- [ ] Move tests to module script
 
 ## Gameplay
 
@@ -27,9 +32,9 @@ This file is a shared task-board. When editing, only:
 - [x] Subtraction upgrades
 - [x] Add levels mechanic
 - [x] Upgrade that boosts xp gain
-- [x] Currency obtainable by new click button (Successor)
-- [ ] New reset layer that reset subtractions and levels but not Successor, (Predecessor)
-- [ ] Move tests to module script
+- [x] Currency obtainable by new click button: Successor
+- [x] New reset layer that reset subtractions and levels: Predecessor
+- [ ] Predecessor upgrades
 
 ## Design
 
@@ -39,10 +44,12 @@ This file is a shared task-board. When editing, only:
 - [x] Create large numbers notation
 - [x] Add levels bar
 - [x] Make negative number actually negative
-- [x] Remove currency icon when upgrade is maxed
+- [x] Remove currency symbol when upgrade is maxed
 - [x] Hide negative sign on maxed resetPoint upgrades
+- [x] Scientific notation
+- [x] Add currency symbol after reset gain display
 - [ ] Display xp gain per count
-- [ ] Separate score and predecessor upgrades
+- [ ] Display current upgrade boost
 
 ### G/Ideas
 
@@ -52,10 +59,11 @@ This file is a shared task-board. When editing, only:
 - 0.1s cooldown for buying upgrades
 - Upgrades to keep stuff on reset
 - Upgrades increase count by 10% per Successor
-- Compound boost
 - Decrease autoClick cooldown
 - Divide level req
 - Root level req
+- Show how to unlock Successor
+- Separate score and predecessor upgrades
 
 ## Adding Upgrades
 

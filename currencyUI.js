@@ -1,18 +1,17 @@
 "use strict";
-import {toNotation} from "./notation.js";
+import {notation} from "./notation.js";
 import {Formulas} from "./formulas.js";
 import {Upg, Cc} from "./playerData.js";
+import {UpdResetDisplay} from "./reset.js";
 
 export const CurrencyUI = {
     point() {
-        document.getElementById("score").textContent = toNotation(Cc.get("point"));
-        document.getElementById("next-reset-subtraction-points").textContent = "-" + toNotation(Formulas.nextResetPoint());
+        document.getElementById("score").textContent = notation(Cc.get("point"), "point");
+        if (UpdResetDisplay.point) UpdResetDisplay.point();
     },
 
     resetPoint() {
-        const value = Cc.get("resetPoint");
-        const sign = value > 0 ? "-" : "";
-        document.getElementById("subtraction-points").textContent = sign + toNotation(value);
+        document.getElementById("subtraction-points").textContent = notation(Cc.get("resetPoint"), "resetPoint");
     },
 
     xp() {
@@ -24,14 +23,14 @@ export const CurrencyUI = {
         const nextReq = Formulas.levelUpReq();
 
         document.getElementById("level").textContent = Cc.get("level");
-        document.getElementById("level-progress-text").textContent = `${toNotation(progress)} / ${toNotation(nextReq)} Xp`;
+        document.getElementById("level-progress-text").textContent = `${notation(progress, "xp")} / ${notation(nextReq, "xp")} Xp`;
 
         const pct = Math.max(0, Math.min(1, progress / nextReq));
         document.getElementById("level-bar-fill").style.width = `${Math.round(pct * 1000) / 10}%`;
     },
 
     point2() {
-        document.getElementById("point2-display").textContent = toNotation(Cc.get("point2"));
+        document.getElementById("point2-display").textContent = notation(Cc.get("point2"), "point2");
     },
 }
 

@@ -1,5 +1,4 @@
 "use strict";
-import {RESET_REQUIREMENT} from "./config.js";
 import {Cc, Upg} from "./playerData.js";
 
 function getLevelBoost() {
@@ -25,11 +24,12 @@ export const Formulas = {
         * (Upg.get("addCountAndCooldown") + 1)
         * (Upg.get("addCount") * 0.2 + 1)
         * (Upg.get("addCount2") * 0.1 + 1)
-        * (getLevelBoost() * 0.05 + 1));
+        * (getLevelBoost() * (0.05 + Upg.get("boostLevel") * 0.01) + 1))
+        * 1.05**Upg.get("mulCount");
     },
 
     incrementBoost() {
-        return 1;
+        return Upg.get("incIncrement") + 1;
     },
 
     xpCountBoost() {
@@ -37,7 +37,7 @@ export const Formulas = {
     },
 
     xpIncrementBoost() {
-        return (Upg.get("incXp2") + 1) * 5;
+        return Upg.get("incXp2") * 5;
     },
 
     countCooldown() {
@@ -52,8 +52,12 @@ export const Formulas = {
         - Upg.get("decIncrementCooldown") * 1_000;
     },
 
-    nextResetPoint() {
-        return Math.floor((Cc.get("point") / RESET_REQUIREMENT) ** 0.5);
+    nextResetPoint(n) {
+        return Math.floor((Cc.get("point") / n) ** 0.5);
+    },
+
+    nextReset2Point(n) {
+        return Math.floor((Cc.get("resetPoint") / n) ** 0.5);
     },
 
     levelUpReq() {

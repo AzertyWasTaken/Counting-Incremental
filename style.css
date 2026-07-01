@@ -120,6 +120,7 @@ label {
     margin-top: 2px;
     border-radius: 1000000px;
     border: 2px solid;
+    font-weight: 700;
 }
 
 .cost-currency.point {
@@ -132,6 +133,12 @@ label {
     color: #FF6040;
     background: rgba(255, 96, 64, 0.1);
     border-color: rgba(255, 96, 64, 0.2);
+}
+
+.cost-currency.reset2Point {
+    color: #FF40A0;
+    background: rgba(255, 64, 160, 0.1);
+    border-color: rgba(255, 64, 160, 0.2);
 }
 
 .cost-currency.point2 {
@@ -147,6 +154,7 @@ label {
 
     font-size: 14px;
     color: #C0C0C0;
+    text-wrap-style: balance;
 }
 
 .upgrade-level {
@@ -158,10 +166,22 @@ label {
     color: #E0E0E0;
 }
 
+.next-reset-gain {
+    font-size: 24px;
+    margin: 0 2px;
+    font-weight: 700px;
+}
+
 /* Upgrade button */
 /* ================================================================ */
 
 .upgrade-buy {
+    width: 100%;
+    align-self: center;
+    margin: 0;
+}
+
+.reset-reset {
     width: 100%;
     align-self: center;
     margin: 0;
