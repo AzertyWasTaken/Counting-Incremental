@@ -1,9 +1,10 @@
 "use strict";
-import {Cc, Upg} from "./playerData.js";
+import {Cc, Upg, Unl} from "./playerData.js";
+// Formulas for gaining currencies
+// Excludes resets gains and upgrades costs
 
 function getLevelBoost() {
-    const isUnlocked = Upg.get("unlockLevelBar") > 0;
-    return isUnlocked ? Cc.get("level") + 1 : 0;
+    return Unl.get("level") ? Cc.get("level") + 1 : 0;
 }
 
 export const Formulas = {
@@ -16,20 +17,24 @@ export const Formulas = {
     },
 
     countBoost() {
-        return Math.floor((1
-            + Upg.get("incCount")
-            + Upg.get("incCount2") * 2
-            + Upg.get("incCount3") * 2
-        )
-        * (Upg.get("addCountAndCooldown") + 1)
-        * (Upg.get("addCount") * 0.2 + 1)
-        * (Upg.get("addCount2") * 0.1 + 1)
-        * (getLevelBoost() * (0.05 + Upg.get("boostLevel") * 0.01) + 1))
-        * 1.05**Upg.get("mulCount");
+        return Math.floor(
+            (
+                1
+                + Upg.get("incCount")
+                + Upg.get("incCount2") * 2
+                + Upg.get("incCount3") * 2
+            )
+            * (Upg.get("addCountAndCooldown") + 1)
+            * (Upg.get("addCount") * 0.2 + 1)
+            * (Upg.get("addCount2") * 0.1 + 1)
+            * (getLevelBoost() * (0.05 + Upg.get("boostLevel") * 0.01) + 1)
+            * 1.05**Upg.get("mulCount")
+        );
     },
 
     incrementBoost() {
-        return Upg.get("incIncrement") + 1;
+        return (Upg.get("incIncrement") + 1)
+        * 2**Upg.get("mulIncrement");
     },
 
     xpCountBoost() {
@@ -41,23 +46,16 @@ export const Formulas = {
     },
 
     countCooldown() {
-        return (1_000
+        return (
+            1_000
             - Upg.get("decCountCooldown") * 250
-        ) 
+        )
         * (Upg.get("addCountAndCooldown") + 1);
     },
 
     incrementCooldown() {
         return 10_000
         - Upg.get("decIncrementCooldown") * 1_000;
-    },
-
-    nextResetPoint(n) {
-        return Math.floor((Cc.get("point") / n) ** 0.5);
-    },
-
-    nextReset2Point(n) {
-        return Math.floor((Cc.get("resetPoint") / n) ** 0.5);
     },
 
     levelUpReq() {

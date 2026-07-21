@@ -8,6 +8,7 @@ export const namesHistory = {
         decCountCooldown: "fastCounting",
         addCountAndCooldown: "multiplication",
         addCount: "predecessor",
+        unlockLevel: "unlockLevelBar",
     },
 
     currencies: {

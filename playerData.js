@@ -16,7 +16,7 @@ export const Upg = {
 
     inc(key, value) {
         this.set(key, this.get(key) + value);
-    },
+    }
 }
 
 export const Cc = {
@@ -30,7 +30,7 @@ export const Cc = {
 
     inc(key, value) {
         this.set(key, this.get(key) + value);
-    },
+    }
 }
 
 export const Unl = {
@@ -40,7 +40,7 @@ export const Unl = {
 
     set(key, value) {
         playerData.unlocked[key] = value;
-    },
+    }
 }
 
 export function getData() {

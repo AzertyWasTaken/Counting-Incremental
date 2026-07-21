@@ -26,24 +26,6 @@ hr {
     margin: 16px 0;
 }
 
-/* Upgrade grid (the actual list in #upgrades) */
-.upgrades-list {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    justify-content: center;
-    gap: 12px;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 8px 0;
-}
-
-/* Generic layout containers */
-.upgrades {
-    margin: 6px auto;
-    max-width: 320px;
-    gap: 0 32px;
-}
-
 /* Text */
 /* ================================================================ */
 
@@ -77,8 +59,18 @@ label {
     font-size: 28px;
 }
 
-/* Upgrade card */
+/* Upgrade dashboard */
 /* ================================================================ */
+
+.upgrades-dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 0;
+}
 
 .upgrade-card {
     display: flex;
@@ -92,6 +84,7 @@ label {
 
     border-radius: 8px;
     background: #202020;
+    border: 2px solid #303030;
     gap: 6px;
 }
 
@@ -116,35 +109,10 @@ label {
 
     width: 24px;
     height: 24px;
-    text-size-adjust: inherit;
-    margin-top: 2px;
-    border-radius: 1000000px;
+    margin: 4px 0;
+    border-radius: 9999px;
     border: 2px solid;
     font-weight: 700;
-}
-
-.cost-currency.point {
-    color: #40FFA0;
-    background: rgba(64, 255, 160, 0.1);
-    border-color: rgba(64, 255, 160, 0.2);
-}
-
-.cost-currency.resetPoint {
-    color: #FF6040;
-    background: rgba(255, 96, 64, 0.1);
-    border-color: rgba(255, 96, 64, 0.2);
-}
-
-.cost-currency.reset2Point {
-    color: #FF40A0;
-    background: rgba(255, 64, 160, 0.1);
-    border-color: rgba(255, 64, 160, 0.2);
-}
-
-.cost-currency.point2 {
-    color: #FFE040;
-    background: rgba(255, 224, 64, 0.1);
-    border-color: rgba(255, 224, 64, 0.2);
 }
 
 .description {
@@ -172,6 +140,12 @@ label {
     font-weight: 700px;
 }
 
+.erase-data-card {
+    margin: 6px auto;
+    max-width: 320px;
+    gap: 0 32px;
+}
+
 /* Upgrade button */
 /* ================================================================ */
 
@@ -194,7 +168,7 @@ button {
     background: #2080FF;
     color: #FFFFFF;
     box-sizing: border-box;
-    border: 0 solid #000;
+    border: none;
     padding: 6px 10px;
     margin: 6px;
     font-size: 20px;
@@ -217,17 +191,97 @@ button:disabled {
     cursor: not-allowed;
 }
 
+/* Currency Dashboard */
+/* ================================================================ */
+
+.currency-dashboard {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.currency-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 1 auto;
+
+    gap: 6px;
+    padding: 12px 20px;
+    min-width: 200px;
+
+    border-radius: 8px;
+    background: #202020;
+    border: 2px solid;
+}
+
+.currency-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.currency-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    border: 2px solid;
+    font-weight: 700;
+}
+
+.currency-name {
+    font-size: 14px;
+    color: #C0C0C0;
+    font-weight: 700;
+}
+
+.currency-value {
+    font-size: 40px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.1;
+}
+
+/* Level display card */
+/* ================================================================ */
+
+.level-display-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.level-progress {
+    font-size: 16px;
+    color: #C0C0C0;
+    margin: 0;
+    white-space: nowrap;
+    font-size: 24px;
+}
+
 /* Level bar */
 /* ================================================================ */
 
 .level-bar-wrap {
+    width: 100%;
     min-height: 10px;
 }
 
 .level-bar-track {
     min-height: 10px;
     background: #606060;
-    border-radius: 1000000px;
+    border-radius: 9999px;
     overflow: hidden;
 }
 
