@@ -1,6 +1,7 @@
 "use strict";
 import {namesHistory} from "./namesHistory.js";
 import {getData, Upg, Cc} from "./playerData.js";
+import {ENABLED} from "./tester.js";
 
 const LS_KEY_PLAYER = "incremental.player";
 
@@ -50,6 +51,8 @@ export function loadPlayerData() {
 }
 
 export function persistPlayerData() {
+    if (ENABLED) return;
+
     const pData = getData();
     if (!pData) return;
 
@@ -71,6 +74,8 @@ function clearObject(obj) {
 }
 
 export function erasePlayerData() {
+    if (ENABLED) return;
+
     const pData = getData();
     if (!pData) return;
 

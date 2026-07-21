@@ -2,8 +2,8 @@
 import {persistPlayerData} from "./saveData.js";
 import {Upg, Cc, Unl} from "./playerData.js";
 
-// Note: can overwrite real saves
-const ENABLED = false;
+// Data is not saved during testing mode
+export const ENABLED = false;
 
 export function initTest() {
     if (!ENABLED) return;
