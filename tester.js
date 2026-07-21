@@ -3,7 +3,7 @@ import {persistPlayerData} from "./saveData.js";
 import {Upg, Cc, Unl} from "./playerData.js";
 
 // Note: can overwrite real saves
-const ENABLED = true;
+const ENABLED = false;
 
 export function initTest() {
     if (!ENABLED) return;
