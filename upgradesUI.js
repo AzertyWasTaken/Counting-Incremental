@@ -45,9 +45,10 @@ function getUpgCost(item) {
 }
 
 function getMax(item) {
-    item.max ??= typeof item.cost === "object"
-    ? item.cost.length : 1;
-    return item.max;
+    return item.max ?? (
+        typeof item.cost === "object" ?
+        item.cost.length : 1
+    );
 }
 
 function isMaxed(item) {

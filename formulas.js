@@ -46,7 +46,7 @@ export const Formulas = {
     },
 
     countCooldown() {
-        return (
+        return Math.max(0,
             1_000
             - Upg.get("decCountCooldown") * 250
         )
@@ -54,8 +54,10 @@ export const Formulas = {
     },
 
     incrementCooldown() {
-        return 10_000
-        - Upg.get("decIncrementCooldown") * 1_000;
+        return Math.max(0,
+            10_000
+            - Upg.get("decIncrementCooldown") * 1_000
+        );
     },
 
     levelUpReq() {

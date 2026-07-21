@@ -80,8 +80,6 @@ function createResetNode(item) {
 }
 
 function shouldShowReset(item) {
-    if (item.reqCurrency === "point2" && !Unl.get("point2")) return false;
-    if (item.reqCurrency === "resetPoint" && !Unl.get("resetPoint")) return false;
     return !item.unlock || Upg.get(item.unlock) > 0;
 }
 

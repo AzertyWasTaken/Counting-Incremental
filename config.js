@@ -204,6 +204,7 @@ export const RESETS = [
         gainCurrency: "reset2Point",
         gainValue: () => Math.floor((Cc.get("resetPoint") / 10_000) ** 0.5),
         reset: ["point", "resetPoint"],
+        unlock: "resetPoint",
         description:
             "Reset Number & Negative Number upgrades.",
     },
@@ -214,6 +215,7 @@ export const RESETS = [
         gainCurrency: "resetPoint2",
         gainValue: () => Math.floor((Cc.get("point2") / 10**12) ** 0.5),
         reset: ["point", "point2"],
+        unlock: "point2",
         description:
             "Reset Number & Successor upgrades.",
     },

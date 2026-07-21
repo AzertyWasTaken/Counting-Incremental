@@ -13,7 +13,7 @@ const data = {
 
     increment: {
         canClick: true,
-        end: 0,
+        endTime: 0,
         interval: null,
         button: () => document.getElementById("increment"),
         display: () => document.getElementById("increment-cooldown"),
